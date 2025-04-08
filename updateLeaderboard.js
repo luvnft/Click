@@ -4,7 +4,7 @@ const { ethers } = require("ethers");
 // ใช้ ABI ที่ตรงกับสัญญาปัจจุบัน (ไม่ใช่ตัวที่มี public address[] users;)
 const abi = require("./src/ClickCounterABI.json");
 
-const RPC_URL = "https://tea-sepolia.g.alchemy.com/public"; 
+const RPC_URL = "https://tea-sepolia.g.alchemy.com/v2/GiIJI8g9SZFKa6GItjBojDKE2Xhj-Y0z"; 
 const CONTRACT_ADDRESS = "0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45";
 
 async function main() {

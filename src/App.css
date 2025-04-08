@@ -497,3 +497,48 @@ html, body {
     0 0 30px rgba(79, 209, 197, 0.5),
     0 0 90px rgba(79, 209, 197, 0.2);
 }
+
+.network-info {
+  position: fixed;
+  bottom: 20px;
+  right: 200px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.get-tea-link {
+  color: #ffd700;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.get-tea-link:hover {
+  color: #ffa500;
+  transform: scale(1.05);
+}
+
+.add-network-button {
+  background: linear-gradient(45deg, #4a90e2, #357abd);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.add-network-button:hover {
+  background: linear-gradient(45deg, #357abd, #4a90e2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.add-network-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}

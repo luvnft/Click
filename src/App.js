@@ -6,6 +6,7 @@ import './App.css';
 import abi from './ClickCounterABI.json';
 import bgMusicFile from './assets/sounds/dont-talk.mp3';
 import clickSoundFile from './assets/effects/click.mp3';
+import { MdVolumeUp, MdVolumeOff } from 'react-icons/md';
 
 const CONTRACT_ADDRESS = "0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45";
 const TEA_CHAIN_ID_HEX = "0x27EA";
@@ -387,6 +388,38 @@ function App() {
   };
 
   // =====================
+  // addTeaSepoliaNetwork
+  // =====================
+  const addTeaSepoliaNetwork = async () => {
+    try {
+      if (!window.ethereum) {
+        toast.error('Please install MetaMask!');
+        return;
+      }
+
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: '0x27ea', // 10218 in hex
+          chainName: 'Tea Sepolia',
+          nativeCurrency: {
+            name: 'TEA',
+            symbol: 'TEA',
+            decimals: 18
+          },
+          rpcUrls: ['https://tea-sepolia.g.alchemy.com/public'],
+          blockExplorerUrls: ['https://sepolia.tea.xyz']
+        }]
+      });
+      
+      toast.success('Tea Sepolia Network added successfully!');
+    } catch (error) {
+      console.error('Error adding Tea Sepolia network:', error);
+      toast.error('Failed to add Tea Sepolia network');
+    }
+  };
+
+  // =====================
   // Render
   // =====================
   return (
@@ -510,14 +543,22 @@ function App() {
         </div>
 
         {/* Faucet Link */}
-        <a
-          href="https://faucet-sepolia.tea.xyz/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="faucet-link"
-        >
-          Get TEA
-        </a>
+        <div className="network-info">
+          <a
+            href="https://faucet-sepolia.tea.xyz/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="faucet-link"
+          >
+            Get TEA
+          </a>
+          <button
+            onClick={addTeaSepoliaNetwork}
+            className="add-network-button"
+          >
+            Add Tea Sepolia Network
+          </button>
+        </div>
       </div>
 
       <ToastContainer position="bottom-left" autoClose={5000} />
