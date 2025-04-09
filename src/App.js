@@ -6,60 +6,47 @@ import './App.css';
 import abi from './ClickCounterABI.json';
 import bgMusicFile from './assets/sounds/dont-talk.mp3';
 import clickSoundFile from './assets/effects/click.mp3';
-import { MdVolumeUp, MdVolumeOff } from 'react-icons/md';
 
-const CONTRACT_ADDRESS = "0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45";
-const TEA_CHAIN_ID_HEX = "0x27EA";
+const CONTRACT_ADDRESS   = '0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45';
+const TEA_CHAIN_ID_HEX   = '0x27EA';          // Tea Sepolia (10218)
 
 function App() {
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [contract, setContract] = useState(null);
+  // ──────────────────────────────── state ────────────────────────────────
+  const [provider,  setProvider]  = useState(null);
+  const [signer,    setSigner]    = useState(null);
+  const [contract,  setContract]  = useState(null);
 
-  const [totalClicks, setTotalClicks] = useState(0);
-  const [myClicks, setMyClicks] = useState(0);
+  const [totalClicks,  setTotalClicks]  = useState(0);
+  const [myClicks,     setMyClicks]     = useState(0);
 
-  // Leaderboard state
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [userRank, setUserRank] = useState(null);
+  const [leaderboard,  setLeaderboard]  = useState([]);
+  const [totalUsers,   setTotalUsers]   = useState(0);
+  const [userRank,     setUserRank]     = useState(null);
 
-  const [isConnected, setIsConnected] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isConnected,  setIsConnected]  = useState(false);
+  const [isMuted,      setIsMuted]      = useState(true);
 
-  // Audio Refs
-  const bgMusicRef = useRef(null);
-  const clickAudioRef = useRef(null);
+  const bgMusicRef   = useRef(null);
+  const clickAudioRef= useRef(null);
 
-  // Pending Tx
   const [pendingTransactions, setPendingTransactions] = useState(new Set());
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
-  // Today Click
   const [myTodayClicks, setMyTodayClicks] = useState(0);
 
-  // =====================
-  // useEffect: Audio init
-  // =====================
+  // ──────────────────────── bootstrap background audio ───────────────────
   useEffect(() => {
-    bgMusicRef.current = new Audio(bgMusicFile);
-    bgMusicRef.current.loop = true;
-    bgMusicRef.current.muted = isMuted;
+    bgMusicRef.current           = new Audio(bgMusicFile);
+    bgMusicRef.current.loop      = true;
+    bgMusicRef.current.muted     = isMuted;
 
-    clickAudioRef.current = new Audio(clickSoundFile);
+    clickAudioRef.current        = new Audio(clickSoundFile);
 
     return () => {
-      if (bgMusicRef.current) {
-        bgMusicRef.current.pause();
-        bgMusicRef.current = null;
-      }
-      if (clickAudioRef.current) {
-        clickAudioRef.current.pause();
-        clickAudioRef.current = null;
-      }
+      bgMusicRef.current?.pause();
+      clickAudioRef.current?.pause();
     };
   }, []);
 
@@ -67,83 +54,64 @@ function App() {
     if (!bgMusicRef.current) return;
     bgMusicRef.current.muted = isMuted;
     if (!isMuted) {
-      bgMusicRef.current.play().catch(err => {
-        console.log("Autoplay blocked or error playing BGM:", err);
-      });
+      bgMusicRef.current.play().catch(err =>
+        console.log('BGM autoplay blocked:', err)
+      );
     }
   }, [isMuted]);
 
-  // =====================================
-  // loadOffChainLeaderboard (สำคัญ!)
-  // =====================================
+  // ─────────────────────── pull cached leaderboard (off‑chain) ───────────
   const loadOffChainLeaderboard = async () => {
     try {
-      // ดึงไฟล์ leaderboard.json จาก public/ 
-      const res = await fetch('/leaderboard.json');
-      if (!res.ok) {
-        throw new Error('Failed to fetch leaderboard.json');
-      }
-      const data = await res.json();
-      // data เป็น array [{ user: "0x...", clicks: "123" }, ...]
+      const res  = await fetch('/leaderboard.json');
+      if (!res.ok) throw new Error('Failed to fetch leaderboard.json');
 
-      // เรียงจากมากไปน้อย (ถ้ายังไม่เรียงในไฟล์)
+      const data = await res.json();                     // [{ user, clicks }, …]
       data.sort((a, b) => Number(b.clicks) - Number(a.clicks));
 
       setLeaderboard(data);
       setTotalUsers(data.length);
 
-      // คำนวณ rank ของ current user ถ้า signer มี address
       if (signer) {
-        const address = await signer.getAddress();
-        const rank = data.findIndex(item => 
-          item.user.toLowerCase() === address.toLowerCase()
+        const addr = await signer.getAddress();
+        const rank = data.findIndex(
+          x => x.user.toLowerCase() === addr.toLowerCase()
         ) + 1;
         setUserRank(rank || null);
       }
-
-      console.log("Off-chain leaderboard loaded!");
-    } catch (error) {
-      console.error(error);
-      toast.error("Unable to load offline leaderboard.");
+    } catch (err) {
+      console.error(err);
+      toast.error('Unable to load offline leaderboard.');
     }
   };
 
-  // =====================
-  // setupNetwork
-  // =====================
+  // ─────────────────────── ensure MetaMask is on Tea Sepolia ─────────────
   const setupNetwork = async () => {
     if (!window.ethereum) {
       toast.error('Please install MetaMask!');
       return false;
     }
     try {
-      const currentChainId = await window.ethereum.request({
-        method: 'eth_chainId'
-      });
-
+      const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
       if (currentChainId !== TEA_CHAIN_ID_HEX) {
-        // ...เหมือนเดิม...
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: TEA_CHAIN_ID_HEX }],
           });
-        } catch (switchError) {
-          // ถ้ามี error code 4902 หรืออื่น ๆ ก็ handle เหมือนเดิม
-          toast.error("Please switch to Tea Sepolia network manually");
+        } catch {
+          toast.error('Please switch to Tea Sepolia manually');
           return false;
         }
       }
       return true;
-    } catch (error) {
-      toast.error("Network setup failed");
+    } catch {
+      toast.error('Network setup failed');
       return false;
     }
   };
 
-  // =====================
-  // loadBlockchainData
-  // =====================
+  // ─────────────────────── read on‑chain stats ───────────────────────────
   const loadBlockchainData = async () => {
     try {
       const prov = new BrowserProvider(window.ethereum);
@@ -154,98 +122,74 @@ function App() {
       setSigner(sign);
       setContract(cont);
 
-      const address = await sign.getAddress();
-
-      // ดึงเฉพาะ totalClicks, userClicks
+      const addr = await sign.getAddress();
       const [total, mine] = await Promise.all([
         cont.totalClicks(),
-        cont.userClicks(address)
+        cont.userClicks(addr),
       ]);
 
       setTotalClicks(Number(total));
       setMyClicks(Number(mine));
-
       setIsConnected(true);
       return true;
-    } catch (error) {
-      toast.error("Unable to load data.");
+    } catch {
+      toast.error('Unable to load data.');
       return false;
     }
   };
 
-  // =====================
-  // connectWallet
-  // =====================
+  // ─────────────────────── connect wallet & sync data ────────────────────
   const connectWallet = async () => {
     try {
-      // เล่น BGM ทันทีที่มี gesture
+      // Un‑mute BGM on first user gesture
       if (bgMusicRef.current) {
         bgMusicRef.current.muted = false;
         setIsMuted(false);
-        try {
-          await bgMusicRef.current.play();
-        } catch (err) {
-          console.log("Autoplay blocked or error playing music: ", err);
-        }
+        try { await bgMusicRef.current.play(); } catch {}
       }
 
       await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const networkSetup = await setupNetwork();
-      if (!networkSetup) return;
+      if (!(await setupNetwork())) return;
+      if (!(await loadBlockchainData())) return;
 
-      const dataLoaded = await loadBlockchainData();
-      if (!dataLoaded) return;
-
-      // เมื่อเชื่อมต่อกระเป๋าเสร็จ ก็โหลด leaderboard.json จาก off-chain
       await loadOffChainLeaderboard();
-
-      toast.success("Connected successfully! 🎉");
-    } catch (error) {
-      if (error.code === 4001) {
-        toast.error("Connection rejected by user");
-      } else {
-        toast.error("Connection failed");
-      }
+      toast.success('Connected successfully! 🎉');
+    } catch (err) {
+      if (err.code === 4001) toast.error('Connection rejected by user');
+      else toast.error('Connection failed');
     }
   };
 
-  // =====================
-  // handleClick
-  // =====================
+  // ─────────────────────── main click handler ────────────────────────────
   const handleClick = async () => {
+    // sfx
     if (clickAudioRef.current) {
       clickAudioRef.current.currentTime = 0;
-      clickAudioRef.current.play().catch(err => {
-        console.log("Cannot play click sound:", err);
-      });
+      clickAudioRef.current.play().catch(() => {});
     }
 
     if (!isConnected) {
       await connectWallet();
       return;
     }
-
     if (!contract || !signer) {
-      toast.error("Contract or Signer not ready!");
+      toast.error('Contract or signer not ready');
       return;
     }
 
     try {
-      const networkOk = await setupNetwork();
-      if (!networkOk) return;
+      if (!(await setupNetwork())) return;
 
       const tx = await contract.click();
       setPendingTransactions(prev => new Set(prev).add(tx.hash));
+      toast.info('Transaction sent');
 
-      toast.info("Transaction sent!");
       const receipt = await tx.wait();
-
       if (receipt.status === 1) {
-        await loadBlockchainData(); 
+        await loadBlockchainData();
         toast.success(
           <div>
-            Click confirmed! 🎉
-            <br />
+            Click confirmed! 🎉<br />
             <a
               href={`https://sepolia.tea.xyz/tx/${tx.hash}`}
               target="_blank"
@@ -257,233 +201,162 @@ function App() {
           </div>
         );
 
-        // อัปเดต Today's Clicks
+        // Track today’s clicks locally
         setMyTodayClicks(prev => {
-          const newVal = prev + 1;
-          localStorage.setItem('myTodayClicks', newVal.toString());
-          return newVal;
+          const next = prev + 1;
+          localStorage.setItem('myTodayClicks', next.toString());
+          return next;
         });
 
-        // **ถ้าอยากให้ Leaderboard ใน UI อัปเดต "ทันที"** 
-        // ก็ต้องไปรัน updateLeaderboard.js ใหม่ + copy ไฟล์ JSON ใหม่
-        // หรือเรียก loadOffChainLeaderboard() อีกครั้ง (แต่ data ไม่เปลี่ยนถ้าไฟล์ไม่เปลี่ยน)
-        // สำหรับ demo นี้อาจเรียก loadOffChainLeaderboard() ซ้ำ:
+        // Off‑chain leaderboard only updates once its JSON is regenerated,
+        // but we reload anyway so users don’t need to refresh.
         await loadOffChainLeaderboard();
       }
 
       setPendingTransactions(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(tx.hash);
-        return newSet;
+        const next = new Set(prev);
+        next.delete(tx.hash);
+        return next;
       });
-    } catch (error) {
-      if (error.code === 'ACTION_REJECTED') {
-        toast.error("Transaction rejected by user");
-      } else if (error.code === 'INSUFFICIENT_FUNDS') {
-        toast.error("Insufficient TEA for gas fees");
-      } else {
-        toast.error("Transaction failed");
-      }
+    } catch (err) {
+      if (err.code === 'ACTION_REJECTED')       toast.error('Transaction rejected');
+      else if (err.code === 'INSUFFICIENT_FUNDS')toast.error('Not enough TEA for gas');
+      else                                       toast.error('Transaction failed');
     }
   };
 
-  // =====================
-  // useEffect: auto connect
-  // =====================
+  // ─────────────────────── auto‑connect if possible ──────────────────────
   useEffect(() => {
     loadTodayClicksFromLocal();
 
-    if (window.ethereum) {
-      window.ethereum.request({ method: 'eth_accounts' })
-        .then(accounts => {
-          if (accounts.length > 0) {
-            connectWallet();
-          } else {
-            // ถ้าไม่มี account ก็อาจ loadOffChainLeaderboard() เพื่อโชว์ได้ด้วย
-            loadOffChainLeaderboard();
-          }
-        });
-
-      window.ethereum.on('chainChanged', async (newChainId) => {
-        if (newChainId !== TEA_CHAIN_ID_HEX) {
-          setIsConnected(false);
-          toast.error("Please switch to Tea Sepolia Network");
-        } else {
-          // chain ถูกเปลี่ยนกลับ -> reload on-chain data
-          await loadBlockchainData();
-          // แล้วโหลด leaderboard JSON
-          await loadOffChainLeaderboard();
-        }
-      });
-
-      window.ethereum.on('accountsChanged', async (accounts) => {
-        if (accounts.length === 0) {
-          setIsConnected(false);
-        } else {
-          await loadBlockchainData();
-          await loadOffChainLeaderboard();
-        }
-      });
-
-      return () => {
-        window.ethereum.removeAllListeners('chainChanged');
-        window.ethereum.removeAllListeners('accountsChanged');
-      };
-    } else {
-      // ถ้าไม่มี metamask เลย ก็ยังโหลด offchain leaderboard ได้
+    if (!window.ethereum) {                       // no MetaMask
       loadOffChainLeaderboard();
+      return;
     }
+
+    window.ethereum.request({ method: 'eth_accounts' }).then(accs => {
+      accs.length ? connectWallet() : loadOffChainLeaderboard();
+    });
+
+    const handleChainChange = async id => {
+      if (id !== TEA_CHAIN_ID_HEX) {
+        setIsConnected(false);
+        toast.error('Please switch to Tea Sepolia');
+      } else {
+        await loadBlockchainData();
+        await loadOffChainLeaderboard();
+      }
+    };
+
+    const handleAccountsChange = async accs => {
+      if (accs.length === 0) setIsConnected(false);
+      else {
+        await loadBlockchainData();
+        await loadOffChainLeaderboard();
+      }
+    };
+
+    window.ethereum.on('chainChanged',    handleChainChange);
+    window.ethereum.on('accountsChanged', handleAccountsChange);
+
+    return () => {
+      window.ethereum.removeListener('chainChanged',    handleChainChange);
+      window.ethereum.removeListener('accountsChanged', handleAccountsChange);
+    };
   }, []);
 
-  // =====================
-  // loadTodayClicksFromLocal
-  // =====================
+  // ─────────────────────── local “today” counter ─────────────────────────
   const loadTodayClicksFromLocal = () => {
-    const storedDate = localStorage.getItem('clickDate');
+    const storedDate  = localStorage.getItem('clickDate');
     const storedValue = localStorage.getItem('myTodayClicks');
-    const currentDate = new Date().toDateString();
+    const today       = new Date().toDateString();
 
-    if (storedDate === currentDate && storedValue) {
-      setMyTodayClicks(parseInt(storedValue));
-    } else {
-      localStorage.setItem('clickDate', currentDate);
+    if (storedDate === today && storedValue) setMyTodayClicks(+storedValue);
+    else {
+      localStorage.setItem('clickDate', today);
       localStorage.setItem('myTodayClicks', '0');
       setMyTodayClicks(0);
     }
   };
 
-  // =====================
-  // renderPendingTxs
-  // =====================
+  // ─────────────────────── helper: pending‑tx badge ──────────────────────
   const renderPendingTxs = () => {
     const count = pendingTransactions.size;
-    if (count > 0) {
-      return (
-        <div className="pending-tx-indicator">
-          {count} pending {count === 1 ? 'transaction' : 'transactions'}...
-        </div>
-      );
-    }
-    return null;
+    return count ? (
+      <div className="pending-tx-indicator">
+        {count} pending {count === 1 ? 'transaction' : 'transactions'}…
+      </div>
+    ) : null;
   };
 
-  // =====================
-  // Pagination
-  // =====================
-  const totalPages = Math.ceil(leaderboard.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = leaderboard.slice(startIndex, endIndex);
+  // ─────────────────────── pagination utils ──────────────────────────────
+  const totalPages  = Math.ceil(leaderboard.length / itemsPerPage);
+  const startIndex  = (currentPage - 1) * itemsPerPage;
+  const currentItems= leaderboard.slice(startIndex, startIndex + itemsPerPage);
 
-  const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  const nextPage = () => currentPage < totalPages && setCurrentPage(p => p + 1);
+  const prevPage = () => currentPage > 1         && setCurrentPage(p => p - 1);
 
-  const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  // =====================
-  // addTeaSepoliaNetwork
-  // =====================
+  // ─────────────────────── add Tea Sepolia to MetaMask ───────────────────
   const addTeaSepoliaNetwork = async () => {
     try {
       if (!window.ethereum) {
         toast.error('Please install MetaMask!');
         return;
       }
-
       await window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
-          chainId: '0x27ea', // 10218 in hex
+          chainId: '0x27ea',
           chainName: 'Tea Sepolia',
-          nativeCurrency: {
-            name: 'TEA',
-            symbol: 'TEA',
-            decimals: 18
-          },
+          nativeCurrency: { name: 'TEA', symbol: 'TEA', decimals: 18 },
           rpcUrls: ['https://tea-sepolia.g.alchemy.com/public'],
-          blockExplorerUrls: ['https://sepolia.tea.xyz']
-        }]
+          blockExplorerUrls: ['https://sepolia.tea.xyz'],
+        }],
       });
-      
-      toast.success('Tea Sepolia Network added successfully!');
-    } catch (error) {
-      console.error('Error adding Tea Sepolia network:', error);
-      toast.error('Failed to add Tea Sepolia network');
+      toast.success('Tea Sepolia added!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to add Tea Sepolia');
     }
   };
 
-  // =====================
-  // Render
-  // =====================
+  // ─────────────────────── render ────────────────────────────────────────
   return (
     <div className="app-container">
-      {/* ปุ่มเปิด/ปิดเสียง (BGM) */}
+      {/* mute/unmute */}
       <div className="sound-control">
-        <button
-          className="glass-button icon-button"
-          onClick={() => setIsMuted(!isMuted)}
-        >
+        <button className="glass-button icon-button" onClick={() => setIsMuted(!isMuted)}>
           {isMuted ? '🔇' : '🔊'}
         </button>
       </div>
 
-      {/* Left Panel */}
+      {/* left stats */}
       <div className="left-panel">
         <div className="stats-panel glass-panel">
-          <div className="stat-item">
-            <span>Total Users</span>
-            <span className="stat-value">{totalUsers.toLocaleString()}</span>
-          </div>
-
-          <div className="stat-item">
-            <span>Total Clicks</span>
-            <span className="stat-value">{totalClicks.toLocaleString()}</span>
-          </div>
-
-          <div className="stat-item">
-            <span>Your Clicks</span>
-            <span className="stat-value">{myClicks.toLocaleString()}</span>
-          </div>
-
-          <div className="stat-item">
-            <span>Today's Clicks</span>
-            <span className="stat-value">{myTodayClicks}</span>
-          </div>
+          <div className="stat-item"><span>Total Users</span><span className="stat-value">{totalUsers.toLocaleString()}</span></div>
+          <div className="stat-item"><span>Total Clicks</span><span className="stat-value">{totalClicks.toLocaleString()}</span></div>
+          <div className="stat-item"><span>Your Clicks</span><span className="stat-value">{myClicks.toLocaleString()}</span></div>
+          <div className="stat-item"><span>Today's Clicks</span><span className="stat-value">{myTodayClicks}</span></div>
         </div>
       </div>
 
-      {/* Center Panel */}
+      {/* center click‑area */}
       <div className="center-panel">
         <div className="main-content">
           <div className="click-button-container">
-            <button
-              onClick={handleClick}
-              className="click-button"
-            >
+            <button onClick={handleClick} className="click-button">
               {isConnected ? 'CLICK' : 'Connect Wallet'}
             </button>
           </div>
-
           {renderPendingTxs()}
         </div>
       </div>
 
-      {/* Right Panel - Leaderboard */}
+      {/* right leaderboard */}
       <div className="right-panel">
         <div className="leaderboard-panel">
-          <div className="leaderboard-header">
-            <h2>
-              <span className="trophy-icon">🏆</span>
-              Leaderboard
-            </h2>
-          </div>
+          <div className="leaderboard-header"><h2>🏆 Leaderboard</h2></div>
 
           {isConnected && userRank > 0 && (
             <div className="user-rank">
@@ -494,68 +367,38 @@ function App() {
           )}
 
           <div className="leaderboard-list">
-            {currentItems.map((entry, index) => {
-              const globalIndex = startIndex + index;
+            {currentItems.map((e, i) => {
+              const idx = startIndex + i;
               return (
                 <div
-                  key={entry.user}
-                  className={`leaderboard-item ${
-                    globalIndex < 3 ? `top-${globalIndex + 1}` : ''
-                  } ${
-                    entry.user.toLowerCase() === signer?.address?.toLowerCase()
-                      ? 'current-user'
-                      : ''
-                  }`}
+                  key={e.user}
+                  className={[
+                    'leaderboard-item',
+                    idx < 3 ? `top-${idx + 1}` : '',
+                    e.user.toLowerCase() === signer?.address?.toLowerCase() ? 'current-user' : '',
+                  ].join(' ')}
                 >
-                  <div className="rank">
-                    #{globalIndex + 1}
-                  </div>
-                  <div className="address">
-                    {entry.user.slice(0, 6)}...{entry.user.slice(-4)}
-                  </div>
-                  <div className="clicks">
-                    {Number(entry.clicks).toLocaleString()}
-                  </div>
+                  <div className="rank">#{idx + 1}</div>
+                  <div className="address">{e.user.slice(0, 6)}…{e.user.slice(-4)}</div>
+                  <div className="clicks">{Number(e.clicks).toLocaleString()}</div>
                 </div>
               );
             })}
           </div>
 
           <div className="pagination-controls">
-            <button
-              onClick={prevPage}
-              disabled={currentPage === 1}
-              className="page-button"
-            >
-              ←
-            </button>
-            <span className="page-info">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={nextPage}
-              disabled={currentPage === totalPages}
-              className="page-button"
-            >
-              →
-            </button>
+            <button onClick={prevPage} disabled={currentPage === 1}  className="page-button">←</button>
+            <span className="page-info">Page {currentPage} of {totalPages}</span>
+            <button onClick={nextPage} disabled={currentPage === totalPages} className="page-button">→</button>
           </div>
         </div>
 
-        {/* Faucet Link */}
+        {/* faucet / add network */}
         <div className="network-info">
-          <a
-            href="https://faucet-sepolia.tea.xyz/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="faucet-link"
-          >
+          <a href="https://faucet-sepolia.tea.xyz/" target="_blank" rel="noopener noreferrer" className="faucet-link">
             Get TEA
           </a>
-          <button
-            onClick={addTeaSepoliaNetwork}
-            className="add-network-button"
-          >
+          <button onClick={addTeaSepoliaNetwork} className="add-network-button">
             Add Tea Sepolia Network
           </button>
         </div>
