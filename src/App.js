@@ -7,27 +7,27 @@ import abi from './ClickCounterABI.json';
 import bgMusicFile from './assets/sounds/dont-talk.mp3';
 import clickSoundFile from './assets/effects/click.mp3';
 
-const CONTRACT_ADDRESS   = '0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45';
-const TEA_CHAIN_ID_HEX   = '0x27EA';          // Tea Sepolia (10218)
+const CONTRACT_ADDRESS = '0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45';
+const TEA_CHAIN_ID_HEX = '0x27EA'; // Tea Sepolia (10218)
 
 function App() {
   // ──────────────────────────────── state ────────────────────────────────
-  const [provider,  setProvider]  = useState(null);
-  const [signer,    setSigner]    = useState(null);
-  const [contract,  setContract]  = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
+  const [contract, setContract] = useState(null);
 
-  const [totalClicks,  setTotalClicks]  = useState(0);
-  const [myClicks,     setMyClicks]     = useState(0);
+  const [totalClicks, setTotalClicks] = useState(0);
+  const [myClicks, setMyClicks] = useState(0);
 
-  const [leaderboard,  setLeaderboard]  = useState([]);
-  const [totalUsers,   setTotalUsers]   = useState(0);
-  const [userRank,     setUserRank]     = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [userRank, setUserRank] = useState(null);
 
-  const [isConnected,  setIsConnected]  = useState(false);
-  const [isMuted,      setIsMuted]      = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
-  const bgMusicRef   = useRef(null);
-  const clickAudioRef= useRef(null);
+  const bgMusicRef = useRef(null);
+  const clickAudioRef = useRef(null);
 
   const [pendingTransactions, setPendingTransactions] = useState(new Set());
 
@@ -38,11 +38,11 @@ function App() {
 
   // ──────────────────────── bootstrap background audio ───────────────────
   useEffect(() => {
-    bgMusicRef.current           = new Audio(bgMusicFile);
-    bgMusicRef.current.loop      = true;
-    bgMusicRef.current.muted     = isMuted;
+    bgMusicRef.current = new Audio(bgMusicFile);
+    bgMusicRef.current.loop = true;
+    bgMusicRef.current.muted = isMuted;
 
-    clickAudioRef.current        = new Audio(clickSoundFile);
+    clickAudioRef.current = new Audio(clickSoundFile);
 
     return () => {
       bgMusicRef.current?.pause();
@@ -63,21 +63,22 @@ function App() {
   // ─────────────────────── pull cached leaderboard (off‑chain) ───────────
   const loadOffChainLeaderboard = async () => {
     try {
-      const res  = await fetch('/leaderboard.json');
+      const res = await fetch('/leaderboard.json');
       if (!res.ok) throw new Error('Failed to fetch leaderboard.json');
 
-      const data = await res.json();                     // [{ user, clicks }, …]
+      const data = await res.json(); // [{ user, clicks }, …]
       data.sort((a, b) => Number(b.clicks) - Number(a.clicks));
 
       setLeaderboard(data);
       setTotalUsers(data.length);
 
+      // ถ้ามี signer เราจะคำนวณ rank ทันที
       if (signer) {
         const addr = await signer.getAddress();
         const rank = data.findIndex(
           x => x.user.toLowerCase() === addr.toLowerCase()
         ) + 1;
-        setUserRank(rank || null);
+        setUserRank(rank > 0 ? rank : null);
       }
     } catch (err) {
       console.error(err);
@@ -152,7 +153,7 @@ function App() {
       if (!(await setupNetwork())) return;
       if (!(await loadBlockchainData())) return;
 
-      await loadOffChainLeaderboard();
+      // ไม่ต้องเรียก loadOffChainLeaderboard ที่นี่อีก เพราะจะเรียกใน useEffect ด้านล่าง
       toast.success('Connected successfully! 🎉');
     } catch (err) {
       if (err.code === 4001) toast.error('Connection rejected by user');
@@ -207,10 +208,6 @@ function App() {
           localStorage.setItem('myTodayClicks', next.toString());
           return next;
         });
-
-        // Off‑chain leaderboard only updates once its JSON is regenerated,
-        // but we reload anyway so users don’t need to refresh.
-        await loadOffChainLeaderboard();
       }
 
       setPendingTransactions(prev => {
@@ -220,7 +217,7 @@ function App() {
       });
     } catch (err) {
       if (err.code === 'ACTION_REJECTED')       toast.error('Transaction rejected');
-      else if (err.code === 'INSUFFICIENT_FUNDS')toast.error('Not enough TEA for gas');
+      else if (err.code === 'INSUFFICIENT_FUNDS') toast.error('Not enough TEA for gas');
       else                                       toast.error('Transaction failed');
     }
   };
@@ -229,7 +226,7 @@ function App() {
   useEffect(() => {
     loadTodayClicksFromLocal();
 
-    if (!window.ethereum) {                       // no MetaMask
+    if (!window.ethereum) { // no MetaMask
       loadOffChainLeaderboard();
       return;
     }
@@ -244,7 +241,7 @@ function App() {
         toast.error('Please switch to Tea Sepolia');
       } else {
         await loadBlockchainData();
-        await loadOffChainLeaderboard();
+        loadOffChainLeaderboard();
       }
     };
 
@@ -252,24 +249,32 @@ function App() {
       if (accs.length === 0) setIsConnected(false);
       else {
         await loadBlockchainData();
-        await loadOffChainLeaderboard();
+        loadOffChainLeaderboard();
       }
     };
 
-    window.ethereum.on('chainChanged',    handleChainChange);
+    window.ethereum.on('chainChanged', handleChainChange);
     window.ethereum.on('accountsChanged', handleAccountsChange);
 
     return () => {
-      window.ethereum.removeListener('chainChanged',    handleChainChange);
+      window.ethereum.removeListener('chainChanged', handleChainChange);
       window.ethereum.removeListener('accountsChanged', handleAccountsChange);
     };
   }, []);
 
+  // ─────────────────────── useEffect เพื่อตรวจจับการเชื่อมต่อ wallet และ signer ──────────────
+  useEffect(() => {
+    if (isConnected && signer) {
+      // เมื่อเชื่อมต่อ wallet แล้วและ signer พร้อม ให้โหลด leaderboard เพื่อคำนวณ "Your Rank"
+      loadOffChainLeaderboard();
+    }
+  }, [isConnected, signer]);
+
   // ─────────────────────── local “today” counter ─────────────────────────
   const loadTodayClicksFromLocal = () => {
-    const storedDate  = localStorage.getItem('clickDate');
+    const storedDate = localStorage.getItem('clickDate');
     const storedValue = localStorage.getItem('myTodayClicks');
-    const today       = new Date().toDateString();
+    const today = new Date().toDateString();
 
     if (storedDate === today && storedValue) setMyTodayClicks(+storedValue);
     else {
@@ -290,12 +295,12 @@ function App() {
   };
 
   // ─────────────────────── pagination utils ──────────────────────────────
-  const totalPages  = Math.ceil(leaderboard.length / itemsPerPage);
-  const startIndex  = (currentPage - 1) * itemsPerPage;
-  const currentItems= leaderboard.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(leaderboard.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = leaderboard.slice(startIndex, startIndex + itemsPerPage);
 
   const nextPage = () => currentPage < totalPages && setCurrentPage(p => p + 1);
-  const prevPage = () => currentPage > 1         && setCurrentPage(p => p - 1);
+  const prevPage = () => currentPage > 1 && setCurrentPage(p => p - 1);
 
   // ─────────────────────── add Tea Sepolia to MetaMask ───────────────────
   const addTeaSepoliaNetwork = async () => {
@@ -387,7 +392,7 @@ function App() {
           </div>
 
           <div className="pagination-controls">
-            <button onClick={prevPage} disabled={currentPage === 1}  className="page-button">←</button>
+            <button onClick={prevPage} disabled={currentPage === 1} className="page-button">←</button>
             <span className="page-info">Page {currentPage} of {totalPages}</span>
             <button onClick={nextPage} disabled={currentPage === totalPages} className="page-button">→</button>
           </div>
