@@ -11,7 +11,6 @@ const CONTRACT_ADDRESS = '0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45';
 const TEA_CHAIN_ID_HEX = '0x27EA'; // Tea Sepolia (10218)
 
 function App() {
-  // ──────────────────────────────── state ────────────────────────────────
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
@@ -36,7 +35,12 @@ function App() {
 
   const [myTodayClicks, setMyTodayClicks] = useState(0);
 
-  // ──────────────────────── bootstrap background audio ───────────────────
+  // ใช้เพื่อป้องกันการโหลด Leaderboard ซ้ำ
+  const [didLoadLB, setDidLoadLB] = useState(false);
+
+  // ───────────────────────────────────────────────────────────────────
+  // ตั้งค่าเสียง BGM + Sound Effect
+  // ───────────────────────────────────────────────────────────────────
   useEffect(() => {
     bgMusicRef.current = new Audio(bgMusicFile);
     bgMusicRef.current.loop = true;
@@ -60,19 +64,20 @@ function App() {
     }
   }, [isMuted]);
 
-  // ─────────────────────── pull cached leaderboard (off‑chain) ───────────
+  // ───────────────────────────────────────────────────────────────────
+  // โหลดไฟล์ leaderboard.json จาก Off-chain
+  // ───────────────────────────────────────────────────────────────────
   const loadOffChainLeaderboard = async () => {
     try {
       const res = await fetch('/leaderboard.json');
       if (!res.ok) throw new Error('Failed to fetch leaderboard.json');
 
-      const data = await res.json(); // [{ user, clicks }, …]
+      const data = await res.json();
       data.sort((a, b) => Number(b.clicks) - Number(a.clicks));
 
       setLeaderboard(data);
       setTotalUsers(data.length);
 
-      // ถ้ามี signer เราจะคำนวณ rank ทันที
       if (signer) {
         const addr = await signer.getAddress();
         const rank = data.findIndex(
@@ -80,13 +85,16 @@ function App() {
         ) + 1;
         setUserRank(rank > 0 ? rank : null);
       }
+      console.log('Off-chain leaderboard loaded!');
     } catch (err) {
       console.error(err);
       toast.error('Unable to load offline leaderboard.');
     }
   };
 
-  // ─────────────────────── ensure MetaMask is on Tea Sepolia ─────────────
+  // ───────────────────────────────────────────────────────────────────
+  // เช็คว่าอยู่บนเครือข่าย Tea Sepolia หรือไม่
+  // ───────────────────────────────────────────────────────────────────
   const setupNetwork = async () => {
     if (!window.ethereum) {
       toast.error('Please install MetaMask!');
@@ -112,7 +120,9 @@ function App() {
     }
   };
 
-  // ─────────────────────── read on‑chain stats ───────────────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // โหลดข้อมูล on-chain เช่น totalClicks, userClicks
+  // ───────────────────────────────────────────────────────────────────
   const loadBlockchainData = async () => {
     try {
       const prov = new BrowserProvider(window.ethereum);
@@ -139,10 +149,11 @@ function App() {
     }
   };
 
-  // ─────────────────────── connect wallet & sync data ────────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // Connect Wallet
+  // ───────────────────────────────────────────────────────────────────
   const connectWallet = async () => {
     try {
-      // Un‑mute BGM on first user gesture
       if (bgMusicRef.current) {
         bgMusicRef.current.muted = false;
         setIsMuted(false);
@@ -153,7 +164,12 @@ function App() {
       if (!(await setupNetwork())) return;
       if (!(await loadBlockchainData())) return;
 
-      // ไม่ต้องเรียก loadOffChainLeaderboard ที่นี่อีก เพราะจะเรียกใน useEffect ด้านล่าง
+      // ถ้ายังไม่ได้โหลด Leaderboard -> โหลดครั้งเดียว
+      if (!didLoadLB) {
+        await loadOffChainLeaderboard();
+        setDidLoadLB(true);
+      }
+
       toast.success('Connected successfully! 🎉');
     } catch (err) {
       if (err.code === 4001) toast.error('Connection rejected by user');
@@ -161,9 +177,10 @@ function App() {
     }
   };
 
-  // ─────────────────────── main click handler ────────────────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // เมื่อผู้ใช้กดปุ่ม CLICK
+  // ───────────────────────────────────────────────────────────────────
   const handleClick = async () => {
-    // sfx
     if (clickAudioRef.current) {
       clickAudioRef.current.currentTime = 0;
       clickAudioRef.current.play().catch(() => {});
@@ -184,8 +201,8 @@ function App() {
       const tx = await contract.click();
       setPendingTransactions(prev => new Set(prev).add(tx.hash));
       toast.info('Transaction sent');
-
       const receipt = await tx.wait();
+
       if (receipt.status === 1) {
         await loadBlockchainData();
         toast.success(
@@ -202,12 +219,12 @@ function App() {
           </div>
         );
 
-        // Track today’s clicks locally
         setMyTodayClicks(prev => {
           const next = prev + 1;
           localStorage.setItem('myTodayClicks', next.toString());
           return next;
         });
+        // *ไม่* เรียก loadOffChainLeaderboard() อีกต่อไป
       }
 
       setPendingTransactions(prev => {
@@ -222,34 +239,47 @@ function App() {
     }
   };
 
-  // ─────────────────────── auto‑connect if possible ──────────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // useEffect เริ่มต้น: Auto-Connect / หรือ Load Offchain LB ถ้าไม่มี wallet
+  // ───────────────────────────────────────────────────────────────────
   useEffect(() => {
     loadTodayClicksFromLocal();
 
-    if (!window.ethereum) { // no MetaMask
+    if (!window.ethereum) {
+      // ไม่มี MetaMask -> โหลด leaderboard แบบ off-chain ครั้งแรก
       loadOffChainLeaderboard();
+      setDidLoadLB(true);
       return;
     }
 
-    window.ethereum.request({ method: 'eth_accounts' }).then(accs => {
-      accs.length ? connectWallet() : loadOffChainLeaderboard();
-    });
+    window.ethereum.request({ method: 'eth_accounts' })
+      .then(accs => {
+        if (accs.length > 0) {
+          // มี accounts -> เรียก connectWallet()
+          connectWallet();
+        } else {
+          // ไม่มี account -> โหลด leaderboard off-chain
+          loadOffChainLeaderboard();
+          setDidLoadLB(true);
+        }
+      });
 
-    const handleChainChange = async id => {
-      if (id !== TEA_CHAIN_ID_HEX) {
+    const handleChainChange = async chainId => {
+      if (chainId !== TEA_CHAIN_ID_HEX) {
         setIsConnected(false);
         toast.error('Please switch to Tea Sepolia');
       } else {
         await loadBlockchainData();
-        loadOffChainLeaderboard();
+        // ไม่โหลด leaderboard off-chain ซ้ำ
       }
     };
 
-    const handleAccountsChange = async accs => {
-      if (accs.length === 0) setIsConnected(false);
-      else {
+    const handleAccountsChange = async accounts => {
+      if (accounts.length === 0) {
+        setIsConnected(false);
+      } else {
         await loadBlockchainData();
-        loadOffChainLeaderboard();
+        // ไม่โหลด leaderboard off-chain ซ้ำ
       }
     };
 
@@ -262,29 +292,36 @@ function App() {
     };
   }, []);
 
-  // ─────────────────────── useEffect เพื่อตรวจจับการเชื่อมต่อ wallet และ signer ──────────────
+  // ───────────────────────────────────────────────────────────────────
+  // ถ้าผู้ใช้มี Wallet เชื่อมอยู่แต่ยังไม่โหลด LB -> useEffect เสริม
+  // ───────────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (isConnected && signer) {
-      // เมื่อเชื่อมต่อ wallet แล้วและ signer พร้อม ให้โหลด leaderboard เพื่อคำนวณ "Your Rank"
+    if (isConnected && !didLoadLB) {
       loadOffChainLeaderboard();
+      setDidLoadLB(true);
     }
-  }, [isConnected, signer]);
+  }, [isConnected, didLoadLB]);
 
-  // ─────────────────────── local “today” counter ─────────────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // ฟังก์ชันโหลดหรือเซ็ตค่าคลิกวันนี้
+  // ───────────────────────────────────────────────────────────────────
   const loadTodayClicksFromLocal = () => {
     const storedDate = localStorage.getItem('clickDate');
     const storedValue = localStorage.getItem('myTodayClicks');
     const today = new Date().toDateString();
 
-    if (storedDate === today && storedValue) setMyTodayClicks(+storedValue);
-    else {
+    if (storedDate === today && storedValue) {
+      setMyTodayClicks(Number(storedValue));
+    } else {
       localStorage.setItem('clickDate', today);
       localStorage.setItem('myTodayClicks', '0');
       setMyTodayClicks(0);
     }
   };
 
-  // ─────────────────────── helper: pending‑tx badge ──────────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // แสดงจำนวน transaction ที่ pending
+  // ───────────────────────────────────────────────────────────────────
   const renderPendingTxs = () => {
     const count = pendingTransactions.size;
     return count ? (
@@ -294,7 +331,9 @@ function App() {
     ) : null;
   };
 
-  // ─────────────────────── pagination utils ──────────────────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // Pagination
+  // ───────────────────────────────────────────────────────────────────
   const totalPages = Math.ceil(leaderboard.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = leaderboard.slice(startIndex, startIndex + itemsPerPage);
@@ -302,7 +341,9 @@ function App() {
   const nextPage = () => currentPage < totalPages && setCurrentPage(p => p + 1);
   const prevPage = () => currentPage > 1 && setCurrentPage(p => p - 1);
 
-  // ─────────────────────── add Tea Sepolia to MetaMask ───────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // ฟังก์ชันเพิ่ม Tea Sepolia Network
+  // ───────────────────────────────────────────────────────────────────
   const addTeaSepoliaNetwork = async () => {
     try {
       if (!window.ethereum) {
@@ -326,27 +367,41 @@ function App() {
     }
   };
 
-  // ─────────────────────── render ────────────────────────────────────────
+  // ───────────────────────────────────────────────────────────────────
+  // Render UI
+  // ───────────────────────────────────────────────────────────────────
   return (
     <div className="app-container">
-      {/* mute/unmute */}
+      {/* ปุ่ม mute/unmute เสียง */}
       <div className="sound-control">
         <button className="glass-button icon-button" onClick={() => setIsMuted(!isMuted)}>
           {isMuted ? '🔇' : '🔊'}
         </button>
       </div>
 
-      {/* left stats */}
+      {/* Left Stats Panel */}
       <div className="left-panel">
         <div className="stats-panel glass-panel">
-          <div className="stat-item"><span>Total Users</span><span className="stat-value">{totalUsers.toLocaleString()}</span></div>
-          <div className="stat-item"><span>Total Clicks</span><span className="stat-value">{totalClicks.toLocaleString()}</span></div>
-          <div className="stat-item"><span>Your Clicks</span><span className="stat-value">{myClicks.toLocaleString()}</span></div>
-          <div className="stat-item"><span>Today's Clicks</span><span className="stat-value">{myTodayClicks}</span></div>
+          <div className="stat-item">
+            <span>Total Users</span>
+            <span className="stat-value">{totalUsers.toLocaleString()}</span>
+          </div>
+          <div className="stat-item">
+            <span>Total Clicks</span>
+            <span className="stat-value">{totalClicks.toLocaleString()}</span>
+          </div>
+          <div className="stat-item">
+            <span>Your Clicks</span>
+            <span className="stat-value">{myClicks.toLocaleString()}</span>
+          </div>
+          <div className="stat-item">
+            <span>Today's Clicks</span>
+            <span className="stat-value">{myTodayClicks}</span>
+          </div>
         </div>
       </div>
 
-      {/* center click‑area */}
+      {/* Center Panel: Click Button */}
       <div className="center-panel">
         <div className="main-content">
           <div className="click-button-container">
@@ -358,7 +413,7 @@ function App() {
         </div>
       </div>
 
-      {/* right leaderboard */}
+      {/* Right Panel: Leaderboard */}
       <div className="right-panel">
         <div className="leaderboard-panel">
           <div className="leaderboard-header"><h2>🏆 Leaderboard</h2></div>
@@ -372,20 +427,25 @@ function App() {
           )}
 
           <div className="leaderboard-list">
-            {currentItems.map((e, i) => {
+            {currentItems.map((entry, i) => {
               const idx = startIndex + i;
+              const isCurrentUser = (entry.user.toLowerCase() === signer?.address?.toLowerCase());
               return (
                 <div
-                  key={e.user}
+                  key={entry.user}
                   className={[
                     'leaderboard-item',
                     idx < 3 ? `top-${idx + 1}` : '',
-                    e.user.toLowerCase() === signer?.address?.toLowerCase() ? 'current-user' : '',
+                    isCurrentUser ? 'current-user' : ''
                   ].join(' ')}
                 >
                   <div className="rank">#{idx + 1}</div>
-                  <div className="address">{e.user.slice(0, 6)}…{e.user.slice(-4)}</div>
-                  <div className="clicks">{Number(e.clicks).toLocaleString()}</div>
+                  <div className="address">
+                    {entry.user.slice(0, 6)}…{entry.user.slice(-4)}
+                  </div>
+                  <div className="clicks">
+                    {Number(entry.clicks).toLocaleString()}
+                  </div>
                 </div>
               );
             })}
@@ -398,7 +458,7 @@ function App() {
           </div>
         </div>
 
-        {/* faucet / add network */}
+        {/* Faucet + Add Network Buttons */}
         <div className="network-info">
           <a href="https://faucet-sepolia.tea.xyz/" target="_blank" rel="noopener noreferrer" className="faucet-link">
             Get TEA

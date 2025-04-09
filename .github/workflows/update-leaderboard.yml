@@ -12,7 +12,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-        with:
+        with:  
+        fetch-depth: 0
           persist-credentials: true  # เพื่อให้สามารถ push ข้อมูลกลับไปใน repository ได้
 
       - name: Set up Node.js
