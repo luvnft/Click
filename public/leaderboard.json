@@ -29,7 +29,7 @@
   },
   {
     "user": "0xA8571fe2aA4663aAaC3328612f85c7C6A1F99bD5",
-    "clicks": "390"
+    "clicks": "419"
   },
   {
     "user": "0x23f1DC09dfC8Ea4eDc192B6ffD8a9b1b3E8FC656",
@@ -69,7 +69,7 @@
   },
   {
     "user": "0x72eB9bfE3D7359aEcd9ff201103884708dfDc3e1",
-    "clicks": "245"
+    "clicks": "258"
   },
   {
     "user": "0xd91C176415F3acFe111188e3582809cD2d909Bc9",
@@ -168,6 +168,10 @@
     "clicks": "160"
   },
   {
+    "user": "0xB8a857212F4C5010E9B82ab8Ddca2a7CB7C99879",
+    "clicks": "158"
+  },
+  {
     "user": "0xf66d4094d0c66fC43494B453008f6853b4A45c89",
     "clicks": "156"
   },
@@ -186,10 +190,6 @@
   {
     "user": "0x35d63b7FAD3Da2Fb15F75becD5eDC678A0a3f7d3",
     "clicks": "133"
-  },
-  {
-    "user": "0xB8a857212F4C5010E9B82ab8Ddca2a7CB7C99879",
-    "clicks": "127"
   },
   {
     "user": "0x59CE4e774d7fd49B965041a9B3BEA7E2e107a027",
@@ -226,6 +226,10 @@
   {
     "user": "0xAeaBe9acAB030697405e095Cc61Fc82Cfb1d3e30",
     "clicks": "91"
+  },
+  {
+    "user": "0x1E21BceA9Caa6367891C25d7881a595d8c697729",
+    "clicks": "90"
   },
   {
     "user": "0x7a2E432059f5243Cc8732BF83c42B1f2299Fc862",
@@ -412,6 +416,10 @@
     "clicks": "29"
   },
   {
+    "user": "0x50d20B7071DE08Fa0b9c3F3b266e29eDEd46be6D",
+    "clicks": "29"
+  },
+  {
     "user": "0xd2B4473A8be05C4764B45D80895841DF4CbA882d",
     "clicks": "28"
   },
@@ -541,10 +549,6 @@
   },
   {
     "user": "0xa2Ce79cb2eb70D56aF5F50530ba46b8D27B5B8B8",
-    "clicks": "26"
-  },
-  {
-    "user": "0x1E21BceA9Caa6367891C25d7881a595d8c697729",
     "clicks": "26"
   },
   {
@@ -688,6 +692,10 @@
     "clicks": "8"
   },
   {
+    "user": "0x0137c42084CdEfBA273bd68850064210CbA297c5",
+    "clicks": "8"
+  },
+  {
     "user": "0x1118003aeb105955eaC012884cB07B36e76e0181",
     "clicks": "7"
   },
@@ -812,6 +820,10 @@
     "clicks": "3"
   },
   {
+    "user": "0x9Fd8da66Ca0C6b33D94fa936a040a920C3D9e37C",
+    "clicks": "3"
+  },
+  {
     "user": "0x70796E8Deea0cB8A962917a22C3883f0F595664b",
     "clicks": "2"
   },
@@ -909,6 +921,10 @@
   },
   {
     "user": "0x34d51ACfedB3d50a55BaB9e99b1Bb0d88A669557",
+    "clicks": "1"
+  },
+  {
+    "user": "0x90D4E0614a6e331e764519973798056A1709C4Bd",
     "clicks": "1"
   }
 ]
