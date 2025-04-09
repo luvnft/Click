@@ -18,5 +18,3 @@
 - **MetaMask** – For wallet connectivity and signing transactions.
 - **Alchemy RPC (or Public RPC)** – For connecting to the Tea Sepolia Testnet.
 - **Node.js** – Used to run the leaderboard update script (`updateLeaderboard.js`).
-
-## File Structure
