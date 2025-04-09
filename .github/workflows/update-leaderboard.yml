@@ -1,9 +1,9 @@
-name: อัปเดต Leaderboard ทุกชั่วโมง
+name: update-leaderboard
 
 on:
   schedule:
-    - cron: '0 * * * *'  # ทำงานทุกชั่วโมงที่นาที 0 (UTC)
-  workflow_dispatch:     # สามารถ trigger ด้วยตัวเองได้ด้วย
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
   update-leaderboard:
@@ -14,17 +14,22 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          persist-credentials: true  # เพื่อให้สามารถ push ข้อมูลกลับไปใน repository ได้
+          persist-credentials: true
+
+      - name: Pull latest changes
+        run: |
+          git checkout main
+          git pull origin main
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'         # เปลี่ยนเป็นเวอร์ชัน Node.js ที่คุณต้องการ
+          node-version: '16'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: Run Leaderboard Update Script
+      - name: Run update script
         run: npm run update-leaderboard
 
       - name: Commit leaderboard changes if any
@@ -32,10 +37,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           if ! git diff --quiet public/leaderboard.json; then
-            echo "พบการเปลี่ยนแปลงใน public/leaderboard.json"
             git add public/leaderboard.json
-            git commit -m "📊 อัปเดตข้อมูล leaderboard [skip ci]"
+            git commit -m "📊 Update leaderboard data [skip ci]"
             git push origin main
           else
-            echo "ไม่มีการเปลี่ยนแปลงใน public/leaderboard.json"
+            echo "No changes in public/leaderboard.json"
           fi
