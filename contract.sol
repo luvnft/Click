@@ -5,7 +5,7 @@ contract ClickCounter {
     uint256 public totalClicks;
     mapping(address => uint256) public userClicks;
     
-    // เก็บ address ที่เข้ามาคลิกเพื่อใช้งานใน leaderboard
+    // Store addresses that have clicked for use in the leaderboard
     address[] public users;
     mapping(address => bool) public hasClicked;
     
@@ -15,7 +15,7 @@ contract ClickCounter {
         totalClicks++;
         userClicks[msg.sender]++;
         
-        // บันทึก address ที่เข้ามาคลิกเป็นครั้งแรก
+        // Record the address the first time it clicks
         if (!hasClicked[msg.sender]) {
             hasClicked[msg.sender] = true;
             users.push(msg.sender);
@@ -24,7 +24,7 @@ contract ClickCounter {
         emit Clicked(msg.sender, totalClicks, userClicks[msg.sender]);
     }
     
-    // ฟังก์ชันสำหรับดึงข้อมูล leaderboard
+    // Function to retrieve leaderboard data
     function getLeaderboard() public view returns (address[] memory, uint256[] memory) {
         uint256 length = users.length;
         uint256[] memory clicks = new uint256[](length);
