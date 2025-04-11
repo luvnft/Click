@@ -40,9 +40,15 @@ async function main() {
     // Sort the data in descending order by click count
     result.sort((a, b) => Number(b.clicks) - Number(a.clicks));
   
+    // เพิ่ม timestamp และ metadata
+    const leaderboardData = {
+      lastUpdate: new Date().toISOString(),
+      data: result
+    };
+  
     // Write the result as a JSON file to the public folder
-    fs.writeFileSync("public/leaderboard.json", JSON.stringify(result, null, 2), "utf-8");
-    console.log("Leaderboard updated. Total =", result.length);
+    fs.writeFileSync("public/leaderboard.json", JSON.stringify(leaderboardData, null, 2), "utf-8");
+    console.log("Leaderboard updated. Total =", result.length, "at", leaderboardData.lastUpdate);
     process.exit(0);
   } catch (error) {
     console.error("Error fetching leaderboard data:", error);

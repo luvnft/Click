@@ -37,6 +37,9 @@ function App() {
 
   // ใช้เพื่อป้องกันการโหลด Leaderboard ซ้ำ
   const [didLoadLB, setDidLoadLB] = useState(false);
+  
+  // เก็บเวลาล่าสุดที่ leaderboard อัพเดท
+  const [lastLeaderboardUpdate, setLastLeaderboardUpdate] = useState(null);
 
   // ───────────────────────────────────────────────────────────────────
   // ตั้งค่าเสียง BGM + Sound Effect
@@ -72,15 +75,31 @@ function App() {
       const res = await fetch('/leaderboard.json');
       if (!res.ok) throw new Error('Failed to fetch leaderboard.json');
 
-      const data = await res.json();
-      data.sort((a, b) => Number(b.clicks) - Number(a.clicks));
+      const jsonData = await res.json();
+      
+      // ตรวจสอบและดึงข้อมูลในรูปแบบใหม่
+      let leaderboardData = [];
+      let lastUpdateTimestamp = null;
+      
+      if (jsonData.data && jsonData.lastUpdate) {
+        // รูปแบบใหม่ที่มี timestamp
+        leaderboardData = jsonData.data;
+        lastUpdateTimestamp = new Date(jsonData.lastUpdate);
+      } else {
+        // รูปแบบเก่า (ไม่มี timestamp ในไฟล์ จะไม่แสดง timestamp)
+        leaderboardData = jsonData;
+        lastUpdateTimestamp = null; // ไม่แสดง timestamp เมื่อไม่มีข้อมูล
+      }
+      
+      leaderboardData.sort((a, b) => Number(b.clicks) - Number(a.clicks));
 
-      setLeaderboard(data);
-      setTotalUsers(data.length);
+      setLeaderboard(leaderboardData);
+      setTotalUsers(leaderboardData.length);
+      setLastLeaderboardUpdate(lastUpdateTimestamp);
 
       if (signer) {
         const addr = await signer.getAddress();
-        const rank = data.findIndex(
+        const rank = leaderboardData.findIndex(
           x => x.user.toLowerCase() === addr.toLowerCase()
         ) + 1;
         setUserRank(rank > 0 ? rank : null);
@@ -416,7 +435,14 @@ function App() {
       {/* Right Panel: Leaderboard */}
       <div className="right-panel">
         <div className="leaderboard-panel">
-          <div className="leaderboard-header"><h2>🏆 Leaderboard</h2></div>
+          <div className="leaderboard-header">
+            <h2>🏆 Leaderboard</h2>
+            {lastLeaderboardUpdate && (
+              <div className="last-update">
+                Last update: {lastLeaderboardUpdate.toLocaleString()}
+              </div>
+            )}
+          </div>
 
           {isConnected && userRank > 0 && (
             <div className="user-rank">

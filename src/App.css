@@ -204,6 +204,14 @@ html, body {
   font-size: 1.2rem;
 }
 
+/* สไตล์ Last update timestamp */
+.last-update {
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.5rem;
+}
+
 /* กล่องแสดงอันดับผู้ใช้เอง */
 .user-rank {
   display: flex;
@@ -213,7 +221,7 @@ html, body {
   border: 1px solid rgba(79, 209, 197, 0.2);
   border-radius: 12px;
   padding: 1rem;
-  margin: 1rem 1rem 0; /* เว้นขอบซ้ายขวาเล็กน้อย */
+  margin: 1rem 1rem 1rem; /* เพิ่ม margin-bottom จาก 0 เป็น 1.5rem */
   text-align: center;
 }
 .user-rank .rank-label {
