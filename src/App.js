@@ -6,6 +6,7 @@ import './App.css';
 import abi from './ClickCounterABI.json';
 import bgMusicFile from './assets/sounds/dont-talk.mp3';
 import clickSoundFile from './assets/effects/click.mp3';
+import { Analytics } from "@vercel/analytics/react"
 
 const CONTRACT_ADDRESS = '0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45';
 const TEA_CHAIN_ID_HEX = '0x27EA'; // Tea Sepolia (10218)
