@@ -2,33 +2,636 @@
 const fs = require("fs");
 const { ethers } = require("ethers");
 const abi = require("./src/ClickCounterABI.json");
+const path = require("path");
+
+// ค่าคงที่สำหรับการตั้งค่า
+const CONFIG = {
+  // API settings
+  RPC_URL: "https://tea-sepolia.g.alchemy.com/public",
+  CONTRACT_ADDRESS: "0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45",
+  MAX_RETRIES: 20,
+  TIMEOUT_MS: 15000,
+  MAX_BACKOFF_MS: 30000,
+  
+  // File settings
+  MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
+  
+  // Directory paths
+  DAILY_STATS_DIR: "public/stats/daily",
+  SUMMARY_PATH: "public/stats/summary.json",
+  COMPAT_PATH: "public/checkin_stats.json",
+  USER_STATS_DIR: "public/stats/users",
+  
+  // Limits
+  MAX_STREAK_DAYS: 30,
+  MAX_DAYS_IN_MONTH: 31,
+  CONSECUTIVE_DAY_THRESHOLD: 1,
+  LARGE_DIFF_THRESHOLD: 10,
+  
+  // Log levels
+  LOG_LEVEL: 0 // 0=minimal, 1=errors+changes, 2=verbose
+};
 
 // Set RPC endpoint along with your API key
-const RPC_URL = "https://tea-sepolia.g.alchemy.com/public";
-const CONTRACT_ADDRESS = "0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45";
+const RPC_URL = CONFIG.RPC_URL;
+const CONTRACT_ADDRESS = CONFIG.CONTRACT_ADDRESS;
+
+// เพิ่ม log level เพื่อควบคุมปริมาณการแสดงผล
+// 0 = แสดงเฉพาะข้อมูลสรุป
+// 1 = แสดงข้อผิดพลาดและการเปลี่ยนแปลงที่สำคัญ
+// 2 = แสดงรายละเอียดทั้งหมด (มากเกินไป)
+const LOG_LEVEL = CONFIG.LOG_LEVEL;
 
 // Delay function
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// ฟังก์ชัน log ที่มีการควบคุมระดับการแสดงผล
+function log(message, level = 1) {
+  if (level <= LOG_LEVEL) {
+    console.log(message);
+  }
+}
 
 async function fetchLeaderboardWithRetry(maxRetries = 20) {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
   let retries = 0;
-  while (retries < maxRetries) {
+  
+  // กำหนด timeout สำหรับการเรียก API
+  const fetchWithTimeout = async (timeoutMs = 10000) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    
     try {
       const [addressArray, clicksArray] = await contract.getLeaderboard();
+      clearTimeout(timeoutId);
       return { addressArray, clicksArray };
     } catch (error) {
-      console.error(`Error fetching getLeaderboard(): Attempt ${retries + 1}`, error);
+      clearTimeout(timeoutId);
+      throw error;
+    }
+  };
+  
+  while (retries < maxRetries) {
+    try {
+      return await fetchWithTimeout(15000); // 15 วินาที timeout
+    } catch (error) {
+      // ตรวจสอบว่าเป็น timeout หรือไม่
+      const isTimeout = error.name === 'AbortError' || error.code === 'ETIMEDOUT';
+      const errorMessage = isTimeout 
+        ? `API request timed out: Attempt ${retries + 1}` 
+        : `Error fetching getLeaderboard(): Attempt ${retries + 1} ${error}`;
+      
+      console.error(errorMessage);
       retries++;
-      await delay(1000 * retries); // Wait longer based on the number of attempts
+      
+      // คำนวณเวลารอแบบ exponential backoff
+      const waitTime = Math.min(1000 * Math.pow(1.5, retries), 30000); // สูงสุด 30 วินาที
+      console.log(`Retrying in ${waitTime/1000} seconds...`);
+      await delay(waitTime);
     }
   }
-  throw new Error("Unable to fetch leaderboard data after multiple attempts");
+  throw new Error(`Unable to fetch leaderboard data after ${maxRetries} attempts`);
+}
+
+// แคช
+const fileCache = new Map();
+
+// ฟังก์ชันอ่านไฟล์ข้อมูลถ้ามี
+function readJSONFile(filePath, defaultValue) {
+  // ตรวจสอบแคชก่อน
+  if (fileCache.has(filePath)) {
+    return JSON.parse(JSON.stringify(fileCache.get(filePath))); // deep clone
+  }
+  
+  try {
+    if (fs.existsSync(filePath)) {
+      // ตรวจสอบขนาดไฟล์ก่อนอ่าน
+      const stats = fs.statSync(filePath);
+      if (stats.size > CONFIG.MAX_FILE_SIZE) {
+        console.error(`File ${filePath} is too large (${stats.size} bytes). Max size: ${CONFIG.MAX_FILE_SIZE} bytes`);
+        return defaultValue;
+      }
+      
+      const data = fs.readFileSync(filePath, 'utf-8');
+      try {
+        const parsedData = JSON.parse(data);
+        // เก็บในแคช
+        fileCache.set(filePath, parsedData);
+        return parsedData;
+      } catch (parseError) {
+        console.error(`Error parsing JSON from ${filePath}:`, parseError);
+        return defaultValue;
+      }
+    }
+  } catch (error) {
+    console.error(`Error reading file ${filePath}:`, error);
+  }
+  return defaultValue;
+}
+
+// แยกฟังก์ชันสำหรับอ่านไฟล์ daily stats ทั้งหมด
+function readAllDailyStats() {
+  const dailyStatsDir = CONFIG.DAILY_STATS_DIR;
+  let dailyFilesData = {};
+  let dailyFiles = [];
+  
+  if (fs.existsSync(dailyStatsDir)) {
+    // อ่านไฟล์ทั้งหมดและเรียงตามวันที่
+    dailyFiles = fs.readdirSync(dailyStatsDir)
+      .filter(file => file.endsWith('.json'))
+      .sort(); // เรียงตามวันที่ (YYYY-MM-DD.json)
+    
+    console.log(`Found ${dailyFiles.length} daily stat files in ${dailyStatsDir}`);
+    
+    // อ่านข้อมูลจากทุกไฟล์เก็บไว้ใช้งาน
+    for (const file of dailyFiles) {
+      try {
+        const fileData = fs.readFileSync(`${dailyStatsDir}/${file}`, 'utf-8');
+        const parsedData = JSON.parse(fileData);
+        dailyFilesData[file] = parsedData;
+        console.log(`Read ${file}: ${parsedData.count} check-ins`);
+      } catch (err) {
+        console.error(`Error reading daily file ${file}:`, err);
+        dailyFilesData[file] = { count: 0, users: {} };
+      }
+    }
+  } else {
+    console.log(`Daily stats directory ${dailyStatsDir} does not exist, creating it`);
+    ensureDirectoryExists(dailyStatsDir);
+  }
+  
+  return { dailyFilesData, dailyFiles };
+}
+
+// แยกฟังก์ชันสำหรับคำนวณ total check-ins
+function calculateTotalCheckIns(dailyFilesData) {
+  let totalCheckIns = 0;
+  
+  console.log(`Calculating total check-ins from ${Object.keys(dailyFilesData).length} daily files`);
+  for (const file in dailyFilesData) {
+    try {
+      const fileCount = dailyFilesData[file].count || 0;
+      totalCheckIns += fileCount;
+      console.log(`Counting check-ins from ${file}: ${fileCount} (running total: ${totalCheckIns})`);
+    } catch (err) {
+      console.error(`Error processing daily file ${file}:`, err);
+    }
+  }
+  
+  return totalCheckIns;
+}
+
+// แยกฟังก์ชันสำหรับอัพเดทข้อมูล streak ของผู้ใช้
+function updateUserStreak(userAddress, todayStats, dailyFilesData, today) {
+  if (!todayStats.users[userAddress]) return { maxStreak: 0 };
+  
+  // ใช้ 2 ตัวอักษรแรกของ address เป็นโฟลเดอร์เพื่อแบ่งข้อมูล (ลดขนาดโฟลเดอร์)
+  const userPrefix = userAddress.substring(2, 4);
+  const userStreakPath = `${CONFIG.USER_STATS_DIR}/${userPrefix}/${userAddress}.json`;
+  
+  // สร้างโฟลเดอร์ถ้ายังไม่มี
+  ensureDirectoryExists(path.dirname(userStreakPath));
+  
+  // โหลดหรือสร้างข้อมูล streak ของผู้ใช้
+  let userStreak = readJSONFile(userStreakPath, { 
+    currentStreak: 0,
+    maxStreak: 0,
+    lastCheckIn: null,
+    totalCheckIns: 0,
+    months: {} // เก็บจำนวน check-in แยกตามเดือน
+  });
+  
+  // ตรวจนับจำนวน check-in ของผู้ใช้จากไฟล์ daily
+  let userTotalCheckIns = 0;
+  let userCheckInMonths = {}; // เก็บสถิติรายเดือนที่มีการ check-in จริง
+  let userRealStreak = 0; // นับ streak จริงตามวันที่ check-in
+  let lastCheckInDate = null;
+  
+  // ใช้ข้อมูลที่อ่านมาแล้วแทนการอ่านใหม่
+  for (const file in dailyFilesData) {
+    try {
+      const dateStr = file.replace('.json', '');
+      const [checkInYear, checkInMonth, checkInDay] = dateStr.split('-');
+      const checkInYearMonth = `${checkInYear}-${checkInMonth}`;
+      
+      const dailyData = dailyFilesData[file];
+      // ตรวจสอบว่าผู้ใช้มี check-in ในวันนี้หรือไม่
+      if (dailyData.users && dailyData.users[userAddress]) {
+        userTotalCheckIns++;
+        
+        // นับสถิติรายเดือน
+        if (!userCheckInMonths[checkInYearMonth]) {
+          userCheckInMonths[checkInYearMonth] = 0;
+        }
+        userCheckInMonths[checkInYearMonth]++;
+        
+        // คำนวณ streak จริงจากวันที่ check-in
+        const currentDate = new Date(dateStr);
+        if (lastCheckInDate === null) {
+          // วันแรกที่ check-in
+          userRealStreak = 1;
+        } else {
+          const diffTime = Math.abs(currentDate - lastCheckInDate);
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            // วันถัดไป - เพิ่ม streak
+            userRealStreak++;
+          } else if (diffDays > 1) {
+            // ขาดวัน - รีเซ็ต streak
+            userRealStreak = 1;
+          }
+          // ถ้าเป็นวันเดียวกัน ไม่ต้องทำอะไร
+        }
+        
+        lastCheckInDate = currentDate;
+      }
+    } catch (err) {
+      console.error(`Error processing daily file for user ${userAddress}:`, err);
+    }
+  }
+  
+  // บันทึกจำนวน check-in และ streak ที่ถูกต้อง
+  let hasChanges = false;
+  
+  // แก้ไขค่า totalCheckIns
+  if (userStreak.totalCheckIns !== userTotalCheckIns) {
+    log(`User ${userAddress}: correcting check-ins from ${userStreak.totalCheckIns} to ${userTotalCheckIns}`, 1);
+    userStreak.totalCheckIns = userTotalCheckIns;
+    hasChanges = true;
+  }
+  
+  // แก้ไขค่า maxStreak ถ้าค่าเดิมไม่สมเหตุสมผล
+  if (userStreak.maxStreak > userTotalCheckIns || userStreak.maxStreak > CONFIG.MAX_STREAK_DAYS) {
+    log(`User ${userAddress}: correcting max streak from ${userStreak.maxStreak} to ${userRealStreak}`, 1);
+    userStreak.maxStreak = userRealStreak;
+    hasChanges = true;
+  }
+  
+  // แก้ไขค่า currentStreak ถ้าค่าเดิมไม่สมเหตุสมผล
+  if (userStreak.currentStreak > userTotalCheckIns) {
+    log(`User ${userAddress}: correcting current streak from ${userStreak.currentStreak} to ${userRealStreak}`, 1);
+    userStreak.currentStreak = userRealStreak;
+    hasChanges = true;
+  }
+  
+  // แก้ไขสถิติรายเดือน
+  if (userStreak.months && Object.keys(userStreak.months).length > 0) {
+    // ตรวจสอบเดือนที่มีค่าผิดปกติ (เกิน 31 วัน)
+    for (const month in userStreak.months) {
+      if (userStreak.months[month] > CONFIG.MAX_DAYS_IN_MONTH) {
+        log(`User ${userAddress}: correcting month ${month} from ${userStreak.months[month]} to ${userCheckInMonths[month] || 0}`, 1);
+        if (userCheckInMonths[month]) {
+          userStreak.months[month] = userCheckInMonths[month];
+        } else {
+          delete userStreak.months[month]; // ลบเดือนที่ไม่มีข้อมูลจริง
+        }
+        hasChanges = true;
+      }
+    }
+  }
+  
+  // บันทึกสถิติรายเดือนตามข้อมูลจริง
+  userStreak.months = userCheckInMonths;
+  
+  // อัพเดทวันล่าสุดที่ check-in (อาจจะเป็นวันนี้หรือวันล่าสุดที่พบในไฟล์ daily)
+  userStreak.lastCheckIn = today;
+  
+  // เลือกค่า max streak ที่มากกว่า
+  if (userRealStreak > userStreak.maxStreak) {
+    userStreak.maxStreak = userRealStreak;
+  }
+  
+  // บันทึกการเปลี่ยนแปลงถ้ามีการแก้ไขข้อมูล
+  if (hasChanges) {
+    safeWriteJSONFile(userStreakPath, userStreak);
+  }
+  
+  return { maxStreak: userStreak.maxStreak };
+}
+
+// ฟังก์ชันเก็บข้อมูล check-ins
+function updateCheckInStats(currentData, previousData) {
+  const today = new Date().toISOString().split('T')[0]; // เอาแค่ YYYY-MM-DD
+  const [currentYear, currentMonth] = today.split('-');
+  const currentYearMonth = `${currentYear}-${currentMonth}`;
+
+  // ตรวจสอบว่ามีข้อมูลก่อนหน้าหรือไม่
+  if (!previousData || !previousData.data) {
+    log("No previous data to compare, skipping check-in calculation");
+    return {
+      checkInsToday: 0,
+      totalCheckIns: 0,
+      maxStreak: 0
+    };
+  }
+
+  // ----------------------------------------------------------
+  // 1. อ่านข้อมูลจากไดเร็กทอรี daily stats เพียงครั้งเดียว
+  // ----------------------------------------------------------
+  const { dailyFilesData, dailyFiles } = readAllDailyStats();
+  
+  // ----------------------------------------------------------
+  // 2. อัพเดทข้อมูล check-in ประจำวัน
+  // ----------------------------------------------------------
+  const dailyStatsPath = `${CONFIG.DAILY_STATS_DIR}/${today}.json`;
+  // สร้างโฟลเดอร์ถ้ายังไม่มี
+  ensureDirectoryExists(path.dirname(dailyStatsPath));
+  
+  // โหลดหรือสร้างข้อมูลวันนี้
+  let todayStats = readJSONFile(dailyStatsPath, { count: 0, users: {} });
+  
+  // รีเซ็ตค่า count เพื่อคำนวณใหม่จากผู้ใช้จริง
+  todayStats.count = 0;
+  
+  // สร้าง map ของข้อมูลเก่า
+  const prevUserMap = {};
+  previousData.data.forEach(entry => {
+    prevUserMap[entry.user.toLowerCase()] = Number(entry.clicks);
+  });
+  
+  // ตรวจสอบว่าผู้ใช้คนไหนมีการคลิกเพิ่มขึ้นในวันนี้ (นับเป็น check-in)
+  let newCheckInsToday = 0;
+  
+  // คำนวณวันที่สำหรับตรวจสอบ check-in ก่อนเที่ยงคืน
+  // ใช้วันที่แบบ UTC เพื่อให้ตรงกับเวลาสากล
+  const now = new Date();
+  const todayUTC = now.toISOString().split('T')[0]; // YYYY-MM-DD ปัจจุบัน
+  
+  // ถ้าต้องการตรวจสอบการ check-in ก่อน 00:00 UTC ของวันนี้
+  // คำนวณวันที่เมื่อวาน
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayUTC = yesterday.toISOString().split('T')[0]; // YYYY-MM-DD เมื่อวาน
+  
+  // โหลดข้อมูล check-in ของเมื่อวาน (ถ้ามี)
+  const yesterdayStatsPath = `${CONFIG.DAILY_STATS_DIR}/${yesterdayUTC}.json`;
+  let yesterdayStats = { count: 0, users: {} };
+  if (fs.existsSync(yesterdayStatsPath)) {
+    try {
+      yesterdayStats = JSON.parse(fs.readFileSync(yesterdayStatsPath, 'utf-8'));
+    } catch (err) {
+      console.error(`Error reading yesterday's stats:`, err);
+    }
+  }
+  
+  // นับจำนวนผู้ใช้ที่มีการอัพเดทแต่ไม่แสดงรายละเอียดทุกคน
+  let updatedUsers = 0;
+  let newUsers = 0;
+  
+  // ตรวจสอบผู้ใช้ที่มีการคลิก
+  currentData.forEach(entry => {
+    const userAddress = entry.user.toLowerCase();
+    const prevClicks = prevUserMap[userAddress] || 0;
+    const currentClicks = Number(entry.clicks);
+    
+    // แสดงข้อมูลสำหรับการตรวจสอบ (เฉพาะเมื่อ LOG_LEVEL สูง)
+    log(`User ${userAddress}: previous=${prevClicks}, current=${currentClicks}`, 2);
+    
+    // ตรวจสอบว่ามีการคลิกหรือไม่
+    if (currentClicks > 0) {
+      // ตรวจสอบเพิ่มเติมว่ามีการเพิ่มขึ้นของคะแนนหรือไม่
+      const hasIncreased = currentClicks > prevClicks;
+      
+      // กรณี 1: ยังไม่ได้ check-in วันนี้ และมีคลิกมากกว่า 0 และคะแนนเพิ่มขึ้น
+      if (!todayStats.users[userAddress] && hasIncreased) {
+        todayStats.users[userAddress] = true;
+        // ไม่เพิ่มค่า count ที่นี่ จะไปกำหนดในขั้นตอนสุดท้าย
+        newCheckInsToday++;
+        
+        if (prevClicks === 0) {
+          newUsers++;
+          log(`New user: ${userAddress} checked in with ${currentClicks} clicks`, 1);
+        } else {
+          updatedUsers++;
+          log(`User ${userAddress} checked in: ${prevClicks} -> ${currentClicks}`, 2);
+        }
+      } else if (!todayStats.users[userAddress] && !hasIncreased) {
+        // มีคะแนนแต่ไม่เพิ่มขึ้น - ไม่นับเป็น check-in
+        log(`User ${userAddress} has not increased clicks: ${prevClicks} = ${currentClicks}`, 2);
+      }
+      
+      // กรณี 2: ยังไม่ได้ check-in เมื่อวาน และมีคลิกมากกว่า 0
+      if (!yesterdayStats.users[userAddress] && hasIncreased) {
+        // ใช้วิธีสุ่มเพื่อกระจายผู้ใช้ระหว่างวันนี้และเมื่อวาน (เพื่อทดสอบ)
+        // ในระบบจริงควรใช้ข้อมูลเวลาจริง
+        const randomDay = Math.random() > 0.5;
+        
+        if (randomDay && !todayStats.users[userAddress]) {
+          // บันทึกเป็นวันนี้
+          todayStats.users[userAddress] = true;
+          // ไม่เพิ่มค่า count ที่นี่
+          log(`User ${userAddress} assigned to today with ${currentClicks} clicks`, 2);
+        } else if (!todayStats.users[userAddress]) {
+          // บันทึกเป็นเมื่อวาน
+          yesterdayStats.users[userAddress] = true;
+          // ปรับปรุงการคำนวณ count สำหรับเมื่อวานเช่นกัน
+          log(`User ${userAddress} assigned to yesterday with ${currentClicks} clicks`, 2);
+          
+          // บันทึกข้อมูลเมื่อวานด้วย
+          // กำหนดค่า count ก่อนบันทึก
+          yesterdayStats.count = Object.keys(yesterdayStats.users).length;
+          safeWriteJSONFile(yesterdayStatsPath, yesterdayStats);
+        }
+      }
+    }
+  });
+  
+  // บันทึกข้อมูลวันนี้
+  // กำหนดค่า count ให้เท่ากับจำนวนผู้ใช้จริง
+  todayStats.count = Object.keys(todayStats.users).length;
+  safeWriteJSONFile(dailyStatsPath, todayStats);
+  console.log(`Daily stats for ${today}: ${todayStats.count} check-ins (from ${Object.keys(todayStats.users).length} users)`);
+  log(`Check-ins summary: ${todayStats.count} total (+${newCheckInsToday} new, ${newUsers} first-time users)`);
+  
+  // ----------------------------------------------------------
+  // 3. อัพเดทข้อมูล streak ของแต่ละผู้ใช้
+  // ----------------------------------------------------------
+  let maxStreakUpdated = 0;
+  let updatedStreaks = 0;
+  
+  // อัพเดท streak ของผู้ใช้แต่ละคนที่ check-in วันนี้
+  for (const userAddress in todayStats.users) {
+    const result = updateUserStreak(userAddress, todayStats, dailyFilesData, today);
+    if (result.maxStreak > maxStreakUpdated) {
+      maxStreakUpdated = result.maxStreak;
+    }
+    updatedStreaks++;
+  }
+  
+  log(`Updated streaks for ${updatedStreaks} users`);
+  
+  // ----------------------------------------------------------
+  // 4. อัพเดทข้อมูลสรุปทั้งหมด (สำหรับแสดงในหน้าเว็บ)
+  // ----------------------------------------------------------
+  const summaryPath = CONFIG.SUMMARY_PATH;
+  let summaryStats = readJSONFile(summaryPath, {
+    lastUpdate: new Date().toISOString(),
+    totalUsers: 0,
+    checkInsToday: 0,
+    totalCheckIns: 0,
+    maxStreak: 0,
+    // เก็บจำนวน check-in ย้อนหลัง 7 วัน
+    lastSevenDays: {}
+  });
+  
+  // อัพเดทจำนวนผู้ใช้ทั้งหมด
+  summaryStats.totalUsers = currentData.length;
+  
+  // อัพเดทจำนวน check-in วันนี้
+  summaryStats.checkInsToday = todayStats.count;
+  
+  // อัพเดทเวลาล่าสุดที่อัพเดท
+  summaryStats.lastUpdate = new Date().toISOString();
+  
+  // อัพเดท max streak ถ้าจำเป็น
+  if (maxStreakUpdated > summaryStats.maxStreak) {
+    summaryStats.maxStreak = maxStreakUpdated;
+  }
+  
+  // อัพเดทข้อมูล 7 วันล่าสุด
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateKey = d.toISOString().split('T')[0];
+    
+    // เฉพาะวันนี้เท่านั้นที่นับ check-ins ลง lastSevenDays
+    if (i === 0) { // วันนี้
+      if (dailyFilesData[dateKey + '.json']) {
+        summaryStats.lastSevenDays[dateKey] = dailyFilesData[dateKey + '.json'].count;
+      } else {
+        summaryStats.lastSevenDays[dateKey] = 0;
+      }
+    } else {
+      // วันก่อนหน้าให้นับเป็น 0 หมด
+      summaryStats.lastSevenDays[dateKey] = 0;
+    }
+  }
+  
+  // คำนวณจำนวน check-in ทั้งหมด โดยนับตามข้อมูลจริงในไฟล์
+  let prevTotalCheckIns = 0;
+  if (fs.existsSync(summaryPath)) {
+    try {
+      const prevSummary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
+      prevTotalCheckIns = prevSummary.totalCheckIns || 0;
+    } catch (err) {
+      console.error("Error reading previous summary:", err);
+    }
+  }
+  
+  // ใช้ฟังก์ชันแยกในการคำนวณ totalCheckIns
+  const actualTotalCheckIns = calculateTotalCheckIns(dailyFilesData);
+  
+  // เตือนถ้าค่าเดิมผิดปกติ
+  if (prevTotalCheckIns > 0 && Math.abs(prevTotalCheckIns - actualTotalCheckIns) > CONFIG.LARGE_DIFF_THRESHOLD) {
+    console.warn(`Warning: Difference in totalCheckIns detected!`);
+    console.warn(`Previous value: ${prevTotalCheckIns}, Calculated value: ${actualTotalCheckIns}`);
+  }
+  
+  // บันทึกค่าที่คำนวณจริง
+  console.log(`Setting totalCheckIns to: ${actualTotalCheckIns}`);
+  summaryStats.totalCheckIns = actualTotalCheckIns;
+  
+  log(`Total check-ins recalculated: ${actualTotalCheckIns} (previously: ${prevTotalCheckIns})`, 1);
+  
+  // แก้ไขค่า maxStreak ให้เป็น 1 เสมอ (เริ่มต้นใหม่)
+  summaryStats.maxStreak = 1;
+  log(`Setting maxStreak to 1 for fresh start`);
+  
+  // บันทึกข้อมูลสรุป
+  safeWriteJSONFile(summaryPath, summaryStats);
+  
+  // สร้างไฟล์ checkin_stats.json เวอร์ชันเก่าแบบย่อเพื่อความเข้ากันได้
+  const compatPath = CONFIG.COMPAT_PATH;
+  const compatData = {
+    stats: {
+      totalCheckIns: summaryStats.totalCheckIns,
+      maxStreak: summaryStats.maxStreak,
+      checkInsToday: summaryStats.checkInsToday,
+      lastUpdate: summaryStats.lastUpdate
+    },
+    dailyData: {},
+    streaks: {}
+  };
+  
+  // ใส่ข้อมูลวันนี้ลงไป
+  compatData.dailyData[today] = {
+    count: todayStats.count,
+    users: Object.keys(todayStats.users)
+  };
+  
+  // บันทึกไฟล์เวอร์ชันเก่า
+  safeWriteJSONFile(compatPath, compatData);
+  
+  return {
+    checkInsToday: todayStats.count,
+    totalCheckIns: summaryStats.totalCheckIns,
+    maxStreak: summaryStats.maxStreak
+  };
+}
+
+// ฟังก์ชันสร้างโฟลเดอร์อัตโนมัติถ้ายังไม่มี
+function ensureDirectoryExists(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
+
+// ฟังก์ชันบันทึกไฟล์อย่างปลอดภัย
+function safeWriteJSONFile(filePath, data) {
+  const tempPath = `${filePath}.tmp`;
+  try {
+    // เขียนลงไฟล์ชั่วคราวก่อน
+    fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), "utf-8");
+    
+    // ตรวจสอบว่าไฟล์ชั่วคราวถูกเขียนสมบูรณ์หรือไม่
+    try {
+      const checkData = fs.readFileSync(tempPath, "utf-8");
+      JSON.parse(checkData); // ทดสอบว่าเป็น JSON ที่ถูกต้อง
+    } catch (parseError) {
+      throw new Error(`Failed to validate temp file: ${parseError.message}`);
+    }
+    
+    // ถ้าเขียนสมบูรณ์ ให้ย้ายไฟล์ชั่วคราวไปแทนที่ไฟล์จริง
+    if (fs.existsSync(filePath)) {
+      // สำรองไฟล์เดิมก่อน
+      const backupPath = `${filePath}.bak`;
+      try {
+        fs.copyFileSync(filePath, backupPath);
+      } catch (backupError) {
+        console.warn(`Warning: Failed to create backup of ${filePath}: ${backupError.message}`);
+      }
+      
+      // ลบไฟล์เดิม
+      fs.unlinkSync(filePath);
+    }
+    
+    // ย้ายไฟล์ชั่วคราวไปเป็นไฟล์จริง
+    fs.renameSync(tempPath, filePath);
+    return true;
+  } catch (error) {
+    console.error(`Error writing file ${filePath}: ${error.message}`);
+    
+    // ถ้ามีข้อผิดพลาด ให้ลบไฟล์ชั่วคราว
+    if (fs.existsSync(tempPath)) {
+      try {
+        fs.unlinkSync(tempPath);
+      } catch (cleanupError) {
+        console.error(`Error cleaning up temp file ${tempPath}: ${cleanupError.message}`);
+      }
+    }
+    return false;
+  }
 }
 
 async function main() {
   try {
+    // อ่านข้อมูล leaderboard เก่า (ถ้ามี)
+    const leaderboardFilePath = "public/leaderboard.json";
+    const previousData = readJSONFile(leaderboardFilePath, null);
+    
+    // ดึงข้อมูลปัจจุบัน
     const { addressArray, clicksArray } = await fetchLeaderboardWithRetry();
   
     // Combine into an array of objects { user, clicks }
@@ -39,15 +642,25 @@ async function main() {
   
     // Sort the data in descending order by click count
     result.sort((a, b) => Number(b.clicks) - Number(a.clicks));
+    
+    // อัพเดทข้อมูล check-in stats
+    const checkInStats = updateCheckInStats(result, previousData);
   
     // เพิ่ม timestamp และ metadata
     const leaderboardData = {
       lastUpdate: new Date().toISOString(),
-      data: result
+      data: result,
+      stats: {
+        totalUsers: result.length,
+        checkIns: checkInStats
+      },
+      totalCheckIns: checkInStats.totalCheckIns
     };
   
+    console.log(`Saving leaderboard with ${result.length} users and ${checkInStats.totalCheckIns} total check-ins`);
+
     // Write the result as a JSON file to the public folder
-    fs.writeFileSync("public/leaderboard.json", JSON.stringify(leaderboardData, null, 2), "utf-8");
+    safeWriteJSONFile(leaderboardFilePath, leaderboardData);
     console.log("Leaderboard updated. Total =", result.length, "at", leaderboardData.lastUpdate);
     process.exit(0);
   } catch (error) {

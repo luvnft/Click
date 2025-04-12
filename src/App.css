@@ -1,5 +1,6 @@
 /* ปิด scroll ของหน้าจอ, กำหนดขนาดเต็ม */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -26,6 +27,7 @@ html, body {
 .right-panel {
   display: flex;
   flex-direction: column;
+  height: calc(100vh - 4rem);
   gap: 1rem;
 }
 
@@ -37,7 +39,7 @@ html, body {
 /* เพิ่ม margin ขวาให้กับ right-panel เพื่อเว้นขอบจอ */
 .right-panel {
   margin-right: 4rem; /* หรือ 3rem, 4rem, 50px ฯลฯ ตามต้องการ */
-  }
+}
 
 /* Glass Panel Effect */
 .glass-panel {
@@ -51,38 +53,137 @@ html, body {
 
 /* Stats Panel */
 .stats-panel {
-  height: fit-content;
+  height: auto;
+  max-height: calc(100vh - 20rem);
+  display: flex;
+  flex-direction: column;
+  background: rgba(30, 36, 60, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  padding: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.stats-panel h2 {
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+/* Stats Header */
+.stats-header {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
+.stats-header h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  color: #fff;
+  margin: 0;
+}
+
+/* Stats Content */
+.stats-content {
+  overflow-y: auto;
+}
+
+/* Style the stat items */
 .stat-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  transition: transform 0.2s;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(20, 25, 45, 0.3);
+  transition: all 0.2s;
 }
 
 .stat-item:hover {
-  transform: translateX(5px);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(30, 36, 65, 0.5);
+}
+
+.stat-item span:first-child {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: bold;
   color: #4fd1c5;
   text-shadow: 0 0 10px rgba(79, 209, 197, 0.5);
+}
+
+/* Style the stat values with colorful gradients */
+.stat-item:nth-child(1) .stat-value {
+  color: #4fd1c5;
+  text-shadow: 0 0 10px rgba(79, 209, 197, 0.5);
+}
+
+.stat-item:nth-child(2) .stat-value {
+  background: linear-gradient(to right, #4fd1c5, #38b2ac);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.stat-item:nth-child(3) .stat-value {
+  color: #68d391;
+  text-shadow: 0 0 10px rgba(104, 211, 145, 0.5);
+}
+
+.stat-item:nth-child(4) .stat-value {
+  background: linear-gradient(to right, #63b3ed, #4299e1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.stat-item:nth-child(5) .stat-value {
+  color: #fc8181;
+  text-shadow: 0 0 10px rgba(252, 129, 129, 0.5);
+}
+
+.stat-item:nth-child(6) .stat-value {
+  background: linear-gradient(to right, #b794f4, #805ad5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.stat-item:nth-child(7) .stat-value {
+  color: #f6ad55;
+  text-shadow: 0 0 10px rgba(246, 173, 85, 0.5);
+}
+
+/* Show More Button */
+.show-more-button {
+  margin: 12px auto;
+  padding: 10px 20px;
+  width: calc(100% - 40px);
+  border: none;
+  border-radius: 8px;
+  background: rgba(79, 209, 197, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid rgba(79, 209, 197, 0.3);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.show-more-button:hover {
+  background: rgba(79, 209, 197, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 209, 197, 0.2);
+}
+
+.show-more-button:active {
+  transform: translateY(0);
 }
 
 /* Main Content */
@@ -98,11 +199,13 @@ html, body {
 
 /* Click Button */
 .click-button-container {
-  position: fixed;   /* หรือ absolute ก็ได้ แต่ fixed จะอยู่กลางจอแม้เลื่อน */
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  /* แล้วซ่อน/ปิดคอลัมน์กลางเดิม (หรืออาจเก็บได้ถ้าต้องการ) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .click-button {
@@ -125,13 +228,17 @@ html, body {
 }
 
 .click-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 60%
+  );
   transform: rotate(45deg);
   transition: transform 0.3s;
 }
@@ -178,38 +285,77 @@ html, body {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 10rem);
-  background: rgba(44, 51, 84, 0.5); /* สีน้ำเงินเข้มโปร่งใส */
+  background: rgba(30, 36, 60, 0.8);
   backdrop-filter: blur(10px);
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  min-height: 500px;
 }
 
 /* ส่วนหัว Leaderboard */
 .leaderboard-header {
   padding: 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
 }
+
 .leaderboard-header h2 {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: #fff;
   margin: 0;
 }
-.trophy-icon {
-  color: #FFD700;
-  font-size: 1.2rem;
+
+/* Leaderboard Content (containing list) */
+.leaderboard-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
 }
 
 /* สไตล์ Last update timestamp */
 .last-update {
-  text-align: center;
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.6);
-  margin-top: 0.5rem;
+  margin-top: 5px;
+}
+
+/* User Rank in Header */
+.user-rank-display {
+  margin-top: 12px;
+  padding: 10px;
+  background: rgba(30, 33, 58, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(79, 209, 197, 0.15);
+  text-align: center;
+}
+
+.user-rank-display .user-rank-position {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #805AD5;
+  text-shadow: 0 0 10px rgba(128, 90, 213, 0.3);
+}
+
+.user-rank-display .user-rank-clicks {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 4px;
+}
+
+.go-to-rank-btn.small {
+  margin-top: 8px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  background: rgba(128, 90, 213, 0.2);
+}
+
+.go-to-rank-btn.small:hover {
+  background: rgba(128, 90, 213, 0.4);
 }
 
 /* กล่องแสดงอันดับผู้ใช้เอง */
@@ -217,91 +363,132 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(79, 209, 197, 0.1);
-  border: 1px solid rgba(79, 209, 197, 0.2);
+  background: rgba(30, 38, 67, 0.7);
   border-radius: 12px;
-  padding: 1rem;
-  margin: 1rem 1rem 1rem; /* เพิ่ม margin-bottom จาก 0 เป็น 1.5rem */
+  padding: 20px;
+  margin: 15px;
   text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.user-rank .rank-label {
+
+.rank-label {
   color: #fff;
   font-size: 1rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 10px;
 }
-.user-rank .rank-number {
-  color: #b47cff; /* หรือสีอื่นที่ชอบ */
-  font-size: 2rem;
+
+.rank-number {
+  font-size: 2.5rem;
   font-weight: bold;
-  margin-bottom: 0.25rem;
+  color: #b47cff;
+  text-shadow: 0 0 10px rgba(180, 124, 255, 0.5);
+  margin-bottom: 10px;
 }
-.user-rank .rank-clicks {
+
+.rank-clicks {
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.go-to-rank-btn {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background: rgba(128, 90, 213, 0.3);
+  border: 1px solid rgba(128, 90, 213, 0.5);
+  border-radius: 20px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.go-to-rank-btn:hover {
+  background: rgba(128, 90, 213, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(128, 90, 213, 0.3);
 }
 
 /* รายการ Leaderboard (สกรอลล์ภายใน) */
 .leaderboard-list {
-  flex: 1;
+  height: 100%;
   overflow-y: auto;
-  padding: 0 1rem 1rem;
+  padding: 0;
+  display: block;
+  margin: 0;
 }
 
 /* แต่ละ item ใน Leaderboard */
 .leaderboard-item {
-  display: grid;
-  grid-template-columns: 40px 1fr 60px; /* Rank / Address / Clicks */
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(20, 25, 45, 0.3);
   transition: all 0.2s;
 }
 
 .leaderboard-item:hover {
-  transform: translateX(5px);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(43, 53, 89, 0.8);
 }
 
 /* ไอเท็มอันดับ 1,2,3 */
 .leaderboard-item.top-1 {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: linear-gradient(to right, rgba(255, 215, 0, 0.3), rgba(20, 25, 45, 0.1));
+  border-left: 4px solid gold;
 }
 .leaderboard-item.top-2 {
-  background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(192, 192, 192, 0.05));
-  border: 1px solid rgba(192, 192, 192, 0.3);
+  background: linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(20, 25, 45, 0.1));
+  border-left: 4px solid silver;
 }
 .leaderboard-item.top-3 {
-  background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.05));
-  border: 1px solid rgba(205, 127, 50, 0.3);
+  background: linear-gradient(to right, rgba(205, 127, 50, 0.3), rgba(20, 25, 45, 0.1));
+  border-left: 4px solid #cd7f32;
 }
 
 /* หากเป็นยูสเซอร์ปัจจุบันให้ไฮไลต์ */
 .leaderboard-item.current-user {
-  background: rgba(79, 209, 197, 0.1);
-  border: 1px solid rgba(79, 209, 197, 0.3);
+  background: rgba(79, 209, 197, 0.15);
+  border-left: 4px solid #4fd1c5;
 }
 
 /* คอลัมน์ Rank / Address / Clicks */
 .rank {
-  color: #FFD700;
+  color: #ffd700;
   font-weight: bold;
   font-size: 1rem;
   text-align: center;
 }
-.address {
-  color: #fff;
-  font-family: monospace;
-  font-size: 0.9rem;
+
+.highlighted-rank {
+  color: #ffd700;
+}
+
+.leaderboard-item .address {
+  flex: 1;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 120px;
+  transition: max-width 0.3s ease;
 }
+
+.leaderboard-item .address:hover {
+  max-width: 100%;
+  overflow: visible;
+  white-space: normal;
+  background-color: rgba(0, 0, 0, 0.8);
+  position: relative;
+  z-index: 10;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
 .clicks {
-  color: #FFD700;
+  color: #ffd700;
   font-weight: bold;
   font-size: 1rem;
   text-align: right;
@@ -359,16 +546,31 @@ html, body {
 }
 
 /* Pending Transactions */
-.pending-tx-indicator {
-  position: fixed;
-  bottom: 1rem;
+.pending-tx-container {
+  position: absolute;
+  bottom: -50px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0.75rem 1.5rem;
-  background: rgba(79, 209, 197, 0.1);
-  border: 1px solid rgba(79, 209, 197, 0.3);
-  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+.pending-tx-indicator {
+  position: absolute;
+  bottom: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgba(79, 209, 197, 0.15);
   color: #4fd1c5;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  display: inline-block;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(79, 209, 197, 0.3);
+  box-shadow: 0 0 15px rgba(79, 209, 197, 0.2);
+  z-index: -1;
 }
 
 /* Pagination */
@@ -486,14 +688,18 @@ html, body {
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(79, 209, 197, 0.8), rgba(44, 122, 123, 0.8));
+  background: linear-gradient(
+    135deg,
+    rgba(79, 209, 197, 0.8),
+    rgba(44, 122, 123, 0.8)
+  );
   color: white;
   font-size: 1.5rem;
   font-weight: bold;
   border: none;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 
+  box-shadow:
     0 0 20px rgba(79, 209, 197, 0.3),
     0 0 60px rgba(79, 209, 197, 0.1);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -501,7 +707,7 @@ html, body {
 
 .connect-circle:hover {
   transform: scale(1.05);
-  box-shadow: 
+  box-shadow:
     0 0 30px rgba(79, 209, 197, 0.5),
     0 0 90px rgba(79, 209, 197, 0.2);
 }
@@ -549,4 +755,437 @@ html, body {
 .add-network-button:active {
   transform: translateY(0);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* ปุ่ม debug สำหรับทดสอบระบบ check-in */
+.debug-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 200px;
+}
+
+.debug-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: rgba(79, 209, 197, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid rgba(79, 209, 197, 0.3);
+}
+
+.debug-button:hover {
+  background: rgba(79, 209, 197, 0.3);
+}
+
+/* ปรับแต่ง stat-value-with-button ให้จัดปุ่มและค่าอยู่ในบรรทัดเดียวกัน */
+.stat-value-with-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* สไตล์สำหรับปุ่มเล็ก */
+.small-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(79, 209, 197, 0.2);
+  border: 1px solid rgba(79, 209, 197, 0.4);
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.small-button:hover {
+  background: rgba(79, 209, 197, 0.4);
+  transform: rotate(180deg);
+}
+
+/* Modal styling for Check-in */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: rgba(20, 30, 48, 0.9);
+  border: 1px solid #38b2ac;
+  border-radius: 15px;
+  padding: 20px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 0 20px rgba(56, 178, 172, 0.3);
+  color: white;
+  position: relative;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(56, 178, 172, 0.3);
+  padding-bottom: 10px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #4fd1c5;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #718096;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: white;
+}
+
+.modal-body {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.checkin-icon {
+  font-size: 3rem;
+  color: #4fd1c5;
+  margin: 0 auto 15px;
+  background: rgba(79, 209, 197, 0.1);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #4fd1c5;
+}
+
+.streak-count {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #f6e05e;
+  margin-top: 15px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.checkin-button {
+  background: linear-gradient(to right, #4fd1c5, #38b2ac);
+  color: white;
+  border: none;
+  padding: 12px 35px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1.1rem;
+  min-width: 200px;
+}
+
+.checkin-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(56, 178, 172, 0.4);
+}
+
+/* Bottom Buttons (Get TEA and Add Network) */
+.bottom-buttons {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  z-index: 100;
+}
+
+.bottom-btn {
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  min-width: 180px;
+  text-align: center;
+}
+
+.network-button.bottom-btn {
+  border: none;
+  background: linear-gradient(135deg, #6966FF 0%, #4844c1 100%);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.network-button.bottom-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #7875ff 0%, #5451d5 100%);
+  box-shadow: 0 6px 15px rgba(105, 102, 255, 0.4);
+}
+
+.tea-button.bottom-btn {
+  border: none;
+  background: linear-gradient(135deg, #4fd1c5 0%, #2c7a7b 100%);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tea-button.bottom-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #5ee6d9 0%, #36918e 100%);
+  box-shadow: 0 6px 15px rgba(79, 209, 197, 0.4);
+}
+
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(20, 25, 45, 0.5);
+  margin-top: auto;
+}
+
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .app-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+    overflow-y: auto;
+  }
+
+  .left-panel, .right-panel {
+    width: 100%;
+  }
+
+  .click-button {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .pending-tx-indicator {
+    bottom: -40px;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  .leaderboard-panel {
+    height: auto;
+    max-height: 400px;
+  }
+
+  .bottom-buttons {
+    flex-direction: column;
+    width: 90%;
+    max-width: 300px;
+    gap: 10px;
+  }
+  
+  .bottom-btn {
+    width: 100%;
+    min-width: unset;
+    padding: 12px 15px;
+  }
+  
+  .click-button-container {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* Network Actions Panel */
+.network-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+/* Improved Toast Notification */
+.Toastify__toast-container--bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+.Toastify__toast {
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px) !important;
+  background: rgba(30, 36, 60, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  margin-bottom: 10px !important;
+}
+
+.Toastify__toast-body {
+  font-family: system-ui, -apple-system, sans-serif !important;
+  font-weight: 500 !important;
+  padding: 8px 12px !important;
+}
+
+.Toastify__progress-bar {
+  background: linear-gradient(to right, #4fd1c5, #2c7a7b) !important;
+  height: 4px !important;
+}
+
+/* User Rank Footer */
+.user-rank-footer {
+  padding: 15px;
+  background: rgba(13, 18, 30, 0.9);
+  border-top: 1px solid rgba(79, 209, 197, 0.2);
+  margin-top: auto;
+}
+
+.user-rank-card {
+  background: rgba(25, 32, 54, 0.7);
+  border-radius: 10px;
+  padding: 15px 20px;
+  text-align: center;
+  border: 1px solid rgba(128, 90, 213, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.user-rank-title {
+  color: #fff;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.user-rank-position {
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: #805AD5;
+  margin: 0;
+  line-height: 1;
+  text-shadow: 0 0 15px rgba(128, 90, 213, 0.4);
+}
+
+.user-rank-clicks {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .user-rank-footer {
+    padding: 12px 10px;
+  }
+  
+  .user-rank-position {
+    font-size: 2.8rem;
+  }
+}
+
+/* Custom colorful stats icon */
+.stats-icon {
+  display: inline-flex;
+  margin-right: 8px;
+  width: 24px;
+  height: 24px;
+  position: relative;
+}
+
+.stats-icon .bar {
+  width: 6px;
+  border-radius: 2px;
+  position: absolute;
+  bottom: 0;
+}
+
+.stats-icon .bar:nth-child(1) {
+  height: 18px;
+  left: 0;
+  background: linear-gradient(to top, #4fd1c5, #38b2ac);
+}
+
+.stats-icon .bar:nth-child(2) {
+  height: 24px;
+  left: 9px;
+  background: linear-gradient(to top, #63b3ed, #4299e1);
+}
+
+.stats-icon .bar:nth-child(3) {
+  height: 12px;
+  left: 18px;
+  background: linear-gradient(to top, #f6ad55, #ed8936);
 }
