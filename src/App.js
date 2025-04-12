@@ -255,11 +255,98 @@ function App() {
       const streak = parseInt(localStorage.getItem(`checkInStreak_${userAddress}`)) || 0;
       const total = parseInt(localStorage.getItem(`totalCheckIns_${userAddress}`)) || 0;
       
+      // ลองโหลดข้อมูล streak จากเซิร์ฟเวอร์
+      try {
+        // ดึงข้อมูลจาก API แบบไม่ใช้แคช
+        const cacheKey = `_t=${Date.now()}`;
+        
+        // ทำการดึงข้อมูลจาก checkin_stats.json
+        const response = await fetch(`/checkin_stats.json?${cacheKey}`, {
+          cache: "no-store"
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // ถ้ามีข้อมูลของผู้ใช้นี้ในไฟล์ streak ให้ใช้ค่าจากเซิร์ฟเวอร์
+          if (data.stats) {
+            console.log("Server stats data:", data.stats);
+            
+            // ตรวจสอบว่า totalCheckIns จากเซิร์ฟเวอร์มีค่ามากกว่าใน localStorage หรือไม่
+            if (data.stats.totalCheckIns > total) {
+              console.log(`Updating user total check-ins from ${total} to ${data.stats.totalCheckIns} (from server)`);
+              localStorage.setItem(`totalCheckIns_${userAddress}`, data.stats.totalCheckIns.toString());
+              setTotalCheckIns(data.stats.totalCheckIns);
+            } else {
+              setTotalCheckIns(total);
+            }
+            
+            // ตรวจสอบว่าวันนี้ได้เช็คอินแล้วหรือยัง
+            // โดยเทียบวันที่จาก timestamp ในไฟล์กับวันนี้
+            const serverDate = new Date(data.stats.lastUpdate);
+            const todayDate = new Date();
+            
+            // เช็คว่าเป็นวันเดียวกันหรือไม่
+            const isSameDay = 
+              serverDate.getFullYear() === todayDate.getFullYear() &&
+              serverDate.getMonth() === todayDate.getMonth() &&
+              serverDate.getDate() === todayDate.getDate();
+            
+            if (isSameDay && data.stats.checkInsToday > 0) {
+              console.log("Server shows check-ins today, checking if user has checked in");
+              
+              // ตรวจสอบใน daily data ว่ามีผู้ใช้นี้หรือไม่
+              if (data.dailyData && data.dailyData[todayDate.toISOString().split('T')[0]]) {
+                const todayData = data.dailyData[todayDate.toISOString().split('T')[0]];
+                if (todayData.users && todayData.users.includes(userAddress.toLowerCase())) {
+                  console.log("User found in today's check-ins from server");
+                  localStorage.setItem(`checkedInToday_${userAddress}`, "true");
+                  setCheckedInToday(true);
+                } else {
+                  console.log("User not found in today's check-ins from server");
+                  setCheckedInToday(checkedInToday === "true");
+                }
+              } else {
+                // ไม่พบข้อมูลวันนี้ ใช้ค่าจาก localStorage
+                setCheckedInToday(checkedInToday === "true");
+              }
+            } else {
+              // ไม่ใช่วันนี้หรือไม่มีการเช็คอินวันนี้ ใช้ค่าจาก localStorage
+              setCheckedInToday(checkedInToday === "true");
+            }
+            
+            // อัพเดทค่า streak
+            if (data.stats.maxStreak > 0) {
+              // ในกรณีที่เซิร์ฟเวอร์มีค่า streak ที่น่าเชื่อถือ
+              const serverStreak = data.stats.maxStreak;
+              
+              if (serverStreak > streak) {
+                console.log(`Updating streak from ${streak} to ${serverStreak} (from server)`);
+                localStorage.setItem(`checkInStreak_${userAddress}`, serverStreak.toString());
+                setCheckInStreak(serverStreak);
+              } else {
+                setCheckInStreak(streak);
+              }
+            } else {
+              setCheckInStreak(streak);
+            }
+            
+            return checkedInToday === "true";
+          }
+        }
+      } catch (serverError) {
+        console.error("Error loading streak data from server:", serverError);
+      }
+      
+      // ถ้าไม่สามารถโหลดข้อมูลจากเซิร์ฟเวอร์ได้ ใช้ค่าจาก localStorage
       setCheckedInToday(checkedInToday === "true");
       setCheckInStreak(streak);
       setTotalCheckIns(total);
+      
+      return checkedInToday === "true";
     } catch (error) {
       console.error("Error loading GM data:", error);
+      return false;
     }
   };
 
@@ -622,6 +709,7 @@ function App() {
   // ───────────────────────────────────────────────────────────────────
   const loadGmSummaryData = async () => {
     try {
+      // ใช้ cache breaker เพื่อไม่ให้ browser cache ข้อมูลเก่า
       const cacheKey = `_t=${Date.now()}`;
       const response = await fetch(`/stats/summary.json?${cacheKey}`, {
         cache: "no-store",
@@ -631,12 +719,85 @@ function App() {
         const summaryData = await response.json();
         console.log("Loaded Gm summary data:", summaryData);
 
-        // อัพเดทจำนวน Gm ทั้งหมดในระบบ
+        // อัพเดทข้อมูลทั้งหมดจากเซิร์ฟเวอร์
         if (summaryData.totalCheckIns) {
           setTotalSystemCheckIns(summaryData.totalCheckIns);
         }
+        
+        // อัพเดทค่า checkInsToday จากเซิร์ฟเวอร์
+        if (summaryData.checkInsToday >= 0) {
+          console.log(`Setting checkInsToday from server: ${summaryData.checkInsToday}`);
+        }
+        
+        // นำข้อมูลจากเซิร์ฟเวอร์มาอัพเดทค่า totalCheckIns ของผู้ใช้ด้วย
+        // หาก streak มีค่าที่ไม่สอดคล้องกับข้อมูลอื่น
+        const userAddress = await signer?.getAddress();
+        if (userAddress) {
+          // ดึงค่าจาก localStorage ก่อน
+          const localTotal = parseInt(localStorage.getItem(`totalCheckIns_${userAddress}`)) || 0;
+          
+          // ตรวจสอบว่าค่า totalCheckIns ในระบบมากกว่าหรือเท่ากับ checkInsToday หรือไม่
+          if (summaryData.totalCheckIns < summaryData.checkInsToday) {
+            console.log(`Warning: Server totalCheckIns (${summaryData.totalCheckIns}) is less than checkInsToday (${summaryData.checkInsToday})`);
+          }
+          
+          // หากค่าใน localStorage น้อยกว่าจากเซิร์ฟเวอร์ ให้อัพเดท
+          if (localTotal < summaryData.totalCheckIns) {
+            console.log(`Updating user totalCheckIns from ${localTotal} to ${summaryData.totalCheckIns}`);
+            localStorage.setItem(`totalCheckIns_${userAddress}`, summaryData.totalCheckIns.toString());
+            setTotalCheckIns(summaryData.totalCheckIns);
+          }
+        }
+        
+        // อัพเดทค่า streaks จากเซิร์ฟเวอร์ถ้ามี
+        if (summaryData.maxStreak && userAddress) {
+          const localStreak = parseInt(localStorage.getItem(`checkInStreak_${userAddress}`)) || 0;
+          // ถ้าค่า streak จากเซิร์ฟเวอร์มีความน่าเชื่อถือ ให้ใช้ค่านั้น
+          console.log(`Streak info: local=${localStreak}, server max=${summaryData.maxStreak}`);
+        }
       } else {
-        console.log("Failed to load Gm summary data");
+        console.log("Failed to load Gm summary data:", response.status);
+      }
+      
+      // หากยังไม่สามารถโหลดข้อมูลจาก summary.json ได้ ลองโหลดจาก checkin_stats.json แทน
+      try {
+        const compatResponse = await fetch(`/checkin_stats.json?${cacheKey}`, {
+          cache: "no-store",
+        });
+        
+        if (compatResponse.ok) {
+          const compatData = await compatResponse.json();
+          console.log("Loaded compat checkin_stats.json data:", compatData);
+          
+          // อัพเดทข้อมูลจาก checkin_stats.json
+          if (compatData.stats) {
+            const { totalCheckIns, checkInsToday } = compatData.stats;
+            
+            // อัพเดทค่า totalSystemCheckIns
+            if (totalCheckIns) {
+              setTotalSystemCheckIns(totalCheckIns);
+              console.log(`Updated totalSystemCheckIns from compat file: ${totalCheckIns}`);
+            }
+            
+            // หากมีค่า checkInsToday ก็อัพเดทค่านี้ด้วย
+            if (checkInsToday >= 0) {
+              console.log(`Setting checkInsToday from compat file: ${checkInsToday}`);
+            }
+            
+            // อัพเดทค่า totalCheckIns ของผู้ใช้ถ้าจำเป็น
+            const userAddress = await signer?.getAddress();
+            if (userAddress && totalCheckIns) {
+              const localTotal = parseInt(localStorage.getItem(`totalCheckIns_${userAddress}`)) || 0;
+              if (localTotal < totalCheckIns) {
+                console.log(`Updating user totalCheckIns from ${localTotal} to ${totalCheckIns} (compat)`);
+                localStorage.setItem(`totalCheckIns_${userAddress}`, totalCheckIns.toString());
+                setTotalCheckIns(totalCheckIns);
+              }
+            }
+          }
+        }
+      } catch (compatError) {
+        console.error("Error loading compat checkin_stats.json:", compatError);
       }
     } catch (error) {
       console.error("Error loading Gm summary data:", error);

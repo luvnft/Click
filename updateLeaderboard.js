@@ -167,16 +167,55 @@ function readAllDailyStats() {
 // แยกฟังก์ชันสำหรับคำนวณ total check-ins
 function calculateTotalCheckIns(dailyFilesData) {
   let totalCheckIns = 0;
+  let individualCounts = {};
+  let todayDate = new Date().toISOString().split('T')[0]; // วันที่ปัจจุบัน (YYYY-MM-DD)
+  let todayFile = todayDate + '.json';
+  let checkInsToday = 0;
   
   console.log(`Calculating total check-ins from ${Object.keys(dailyFilesData).length} daily files`);
+  
+  // ตรวจสอบข้อมูลแต่ละไฟล์
   for (const file in dailyFilesData) {
     try {
       const fileCount = dailyFilesData[file].count || 0;
-      totalCheckIns += fileCount;
-      console.log(`Counting check-ins from ${file}: ${fileCount} (running total: ${totalCheckIns})`);
+      const userCount = Object.keys(dailyFilesData[file].users || {}).length;
+      
+      // เก็บข้อมูลวันนี้ไว้ตรวจสอบความถูกต้อง
+      if (file === todayFile) {
+        checkInsToday = Math.max(fileCount, userCount);
+        console.log(`Today's check-ins (${file}): ${checkInsToday}`);
+      }
+      
+      // ตรวจสอบความสอดคล้องของข้อมูล
+      if (fileCount !== userCount) {
+        console.warn(`Warning: File ${file} has inconsistent data: count=${fileCount}, users=${userCount}`);
+        // ใช้ค่าที่มากกว่าเพื่อความมั่นใจว่านับครบ
+        const actualCount = Math.max(fileCount, userCount);
+        individualCounts[file] = actualCount;
+        totalCheckIns += actualCount;
+      } else {
+        individualCounts[file] = fileCount;
+        totalCheckIns += fileCount;
+      }
+      
+      console.log(`Counting check-ins from ${file}: ${individualCounts[file]} (running total: ${totalCheckIns})`);
     } catch (err) {
       console.error(`Error processing daily file ${file}:`, err);
     }
+  }
+  
+  // ตรวจสอบรวมทั้งหมดอีกครั้ง
+  const total = Object.values(individualCounts).reduce((sum, count) => sum + count, 0);
+  if (total !== totalCheckIns) {
+    console.error(`Error in total calculation: sum=${total}, totalCheckIns=${totalCheckIns}`);
+    totalCheckIns = total; // ส่งค่าที่คำนวณใหม่กลับไป
+  }
+  
+  // ตรวจสอบว่า totalCheckIns ต้องไม่น้อยกว่า checkInsToday
+  if (checkInsToday > 0 && totalCheckIns < checkInsToday) {
+    console.error(`Error: totalCheckIns (${totalCheckIns}) is less than checkInsToday (${checkInsToday})`);
+    console.log(`Correcting totalCheckIns to match at least checkInsToday (${checkInsToday})`);
+    totalCheckIns = checkInsToday;
   }
   
   return totalCheckIns;
@@ -298,15 +337,21 @@ function updateUserStreak(userAddress, todayStats, dailyFilesData, today) {
   // อัพเดทวันล่าสุดที่ check-in (อาจจะเป็นวันนี้หรือวันล่าสุดที่พบในไฟล์ daily)
   userStreak.lastCheckIn = today;
   
+  // อัพเดทค่า currentStreak เป็นค่าล่าสุดเสมอ (แม้จะไม่มีเงื่อนไขอื่น)
+  if (userStreak.currentStreak !== userRealStreak) {
+    log(`User ${userAddress}: updating current streak from ${userStreak.currentStreak} to ${userRealStreak}`, 1);
+    userStreak.currentStreak = userRealStreak;
+    hasChanges = true;
+  }
+  
   // เลือกค่า max streak ที่มากกว่า
   if (userRealStreak > userStreak.maxStreak) {
     userStreak.maxStreak = userRealStreak;
+    hasChanges = true;
   }
   
-  // บันทึกการเปลี่ยนแปลงถ้ามีการแก้ไขข้อมูล
-  if (hasChanges) {
-    safeWriteJSONFile(userStreakPath, userStreak);
-  }
+  // บันทึกการเปลี่ยนแปลงเสมอเพื่อให้แน่ใจว่าข้อมูลถูกอัพเดท
+  safeWriteJSONFile(userStreakPath, userStreak);
   
   return { maxStreak: userStreak.maxStreak };
 }
@@ -529,15 +574,15 @@ function updateCheckInStats(currentData, previousData) {
     console.warn(`Previous value: ${prevTotalCheckIns}, Calculated value: ${actualTotalCheckIns}`);
   }
   
-  // บันทึกค่าที่คำนวณจริง
-  console.log(`Setting totalCheckIns to: ${actualTotalCheckIns}`);
+  // ใช้ค่า totalCheckIns ที่คำนวณได้จริงจากข้อมูล daily stats
+  console.log(`Setting totalCheckIns to: ${actualTotalCheckIns} (from actual daily stats)`);
   summaryStats.totalCheckIns = actualTotalCheckIns;
   
-  log(`Total check-ins recalculated: ${actualTotalCheckIns} (previously: ${prevTotalCheckIns})`, 1);
+  log(`Total check-ins set to ${actualTotalCheckIns} (previously: ${prevTotalCheckIns})`, 1);
   
-  // แก้ไขค่า maxStreak ให้เป็น 1 เสมอ (เริ่มต้นใหม่)
+  // แก้ไขค่า maxStreak ให้เป็น 1 เสมอ
   summaryStats.maxStreak = 1;
-  log(`Setting maxStreak to 1 for fresh start`);
+  log(`Setting maxStreak to 1 per requirement`);
   
   // บันทึกข้อมูลสรุป
   safeWriteJSONFile(summaryPath, summaryStats);
@@ -560,6 +605,8 @@ function updateCheckInStats(currentData, previousData) {
     count: todayStats.count,
     users: Object.keys(todayStats.users)
   };
+  
+  console.log(`Writing compat data to ${compatPath} with totalCheckIns=${compatData.stats.totalCheckIns}, checkInsToday=${compatData.stats.checkInsToday}`);
   
   // บันทึกไฟล์เวอร์ชันเก่า
   safeWriteJSONFile(compatPath, compatData);
@@ -646,6 +693,14 @@ async function main() {
     // อัพเดทข้อมูล check-in stats
     const checkInStats = updateCheckInStats(result, previousData);
   
+    // ตรวจสอบค่า totalCheckIns เพื่อความแน่ใจว่าถูกต้อง
+    console.log(`Verifying totalCheckIns (${checkInStats.totalCheckIns}) vs checkInsToday (${checkInStats.checkInsToday})`);
+    if (checkInStats.totalCheckIns < checkInStats.checkInsToday) {
+      console.error(`Error detected: totalCheckIns (${checkInStats.totalCheckIns}) is less than checkInsToday (${checkInStats.checkInsToday})`);
+      console.log(`Correcting totalCheckIns to ${checkInStats.checkInsToday}`);
+      checkInStats.totalCheckIns = checkInStats.checkInsToday;
+    }
+    
     // เพิ่ม timestamp และ metadata
     const leaderboardData = {
       lastUpdate: new Date().toISOString(),
@@ -662,6 +717,20 @@ async function main() {
     // Write the result as a JSON file to the public folder
     safeWriteJSONFile(leaderboardFilePath, leaderboardData);
     console.log("Leaderboard updated. Total =", result.length, "at", leaderboardData.lastUpdate);
+    
+    // รี-เขียนไฟล์ checkin_stats.json อีกรอบเพื่อให้แน่ใจว่าค่าถูกต้อง
+    const checkinStatsPath = CONFIG.COMPAT_PATH;
+    const checkinStatsData = readJSONFile(checkinStatsPath, null);
+    
+    if (checkinStatsData && checkinStatsData.stats) {
+      // อัพเดทค่าที่ถูกต้อง
+      checkinStatsData.stats.totalCheckIns = checkInStats.totalCheckIns;
+      console.log(`Re-writing checkin_stats.json with corrected totalCheckIns=${checkInStats.totalCheckIns}`);
+      
+      // บันทึกไฟล์อีกครั้ง
+      safeWriteJSONFile(checkinStatsPath, checkinStatsData);
+    }
+    
     process.exit(0);
   } catch (error) {
     console.error("Error fetching leaderboard data:", error);
