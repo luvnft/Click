@@ -422,8 +422,8 @@ body {
 /* แต่ละ item ใน Leaderboard */
 .leaderboard-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 12px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(20, 25, 45, 0.3);
@@ -441,11 +441,11 @@ body {
 }
 .leaderboard-item.top-2 {
   background: linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(20, 25, 45, 0.1));
-  border-left: 4px solid silver;
+  border-left: 4px solid gold;
 }
 .leaderboard-item.top-3 {
   background: linear-gradient(to right, rgba(205, 127, 50, 0.3), rgba(20, 25, 45, 0.1));
-  border-left: 4px solid #cd7f32;
+  border-left: 4px solid gold;
 }
 
 /* หากเป็นยูสเซอร์ปัจจุบันให้ไฮไลต์ */
@@ -456,10 +456,11 @@ body {
 
 /* คอลัมน์ Rank / Address / Clicks */
 .rank {
+
   color: #ffd700;
-  font-weight: bold;
-  font-size: 1rem;
+  width: 50px;
   text-align: center;
+  font-weight: bold;
 }
 
 .highlighted-rank {
@@ -467,31 +468,18 @@ body {
 }
 
 .leaderboard-item .address {
-  flex: 1;
-  text-align: center;
+  flex-grow: 1;
+  text-align: left;
+  margin: 0 10px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 120px;
-  transition: max-width 0.3s ease;
 }
 
-.leaderboard-item .address:hover {
-  max-width: 100%;
-  overflow: visible;
-  white-space: normal;
-  background-color: rgba(0, 0, 0, 0.8);
-  position: relative;
-  z-index: 10;
-  border-radius: 4px;
-  padding: 2px 4px;
-}
-
-.clicks {
-  color: #ffd700;
-  font-weight: bold;
-  font-size: 1rem;
+.leaderboard-item .clicks {
+  width: 80px;
   text-align: right;
+  font-weight: bold;
+  color: gold;
 }
 
 /* Sound Control ปุ่ม mute/unmute */
@@ -1188,4 +1176,47 @@ body {
   height: 12px;
   left: 18px;
   background: linear-gradient(to top, #f6ad55, #ed8936);
+}
+
+/* สำหรับคอลัมน์หัวเรื่อง */
+.leaderboard-header-columns {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  color: #aaa;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leaderboard-header-columns .rank-header {
+  width: 50px;
+  text-align: center;
+}
+
+.leaderboard-header-columns .address-header {
+  flex-grow: 1;
+  text-align: left;
+  margin: 0 10px;
+}
+
+.leaderboard-header-columns .clicks-header {
+  width: 80px;
+  text-align: right;
+}
+
+/* ปรับแต่งอันดับสูงสุด */
+.leaderboard-item.top-1 .rank, 
+.leaderboard-item.top-1 .clicks {
+  color: gold;
+}
+
+.leaderboard-item.top-2 .rank,
+.leaderboard-item.top-2 .clicks {
+  color: gold;
+}
+
+.leaderboard-item.top-3 .rank,
+.leaderboard-item.top-3 .clicks {
+  color: gold; /* bronze */
 }

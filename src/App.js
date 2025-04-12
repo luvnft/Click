@@ -255,95 +255,90 @@ function App() {
       const streak = parseInt(localStorage.getItem(`checkInStreak_${userAddress}`)) || 0;
       const total = parseInt(localStorage.getItem(`totalCheckIns_${userAddress}`)) || 0;
       
-      // ลองโหลดข้อมูล streak จากเซิร์ฟเวอร์
+      console.log(`Checking GM data for user ${userAddress}: streak=${streak}, total=${total}`);
+      
       try {
-        // ดึงข้อมูลจาก API แบบไม่ใช้แคช
+        // ดึงข้อมูลจากไฟล์ผู้ใช้โดยตรง
         const cacheKey = `_t=${Date.now()}`;
         
-        // ทำการดึงข้อมูลจาก checkin_stats.json
-        const response = await fetch(`/checkin_stats.json?${cacheKey}`, {
+        // ใช้ 2 ตัวอักษรแรกของแอดเดรสเป็นโฟลเดอร์ย่อย
+        const userPrefix = userAddress.substring(2, 4).toLowerCase();
+        const userStatsUrl = `/stats/users/${userPrefix}/${userAddress.toLowerCase()}.json?${cacheKey}`;
+        
+        console.log(`Trying to load user stats from: ${userStatsUrl}`);
+        
+        const userResponse = await fetch(userStatsUrl, {
           cache: "no-store"
         });
         
-        if (response.ok) {
-          const data = await response.json();
+        if (userResponse.ok) {
+          // ถ้าโหลดข้อมูลผู้ใช้สำเร็จ
+          const userData = await userResponse.json();
+          console.log("Loaded user stats:", userData);
           
-          // ถ้ามีข้อมูลของผู้ใช้นี้ในไฟล์ streak ให้ใช้ค่าจากเซิร์ฟเวอร์
-          if (data.stats) {
-            console.log("Server stats data:", data.stats);
-            
-            // ตรวจสอบว่า totalCheckIns จากเซิร์ฟเวอร์มีค่ามากกว่าใน localStorage หรือไม่
-            if (data.stats.totalCheckIns > total) {
-              console.log(`Updating user total check-ins from ${total} to ${data.stats.totalCheckIns} (from server)`);
-              localStorage.setItem(`totalCheckIns_${userAddress}`, data.stats.totalCheckIns.toString());
-              setTotalCheckIns(data.stats.totalCheckIns);
-            } else {
-              setTotalCheckIns(total);
-            }
-            
-            // ตรวจสอบว่าวันนี้ได้เช็คอินแล้วหรือยัง
-            // โดยเทียบวันที่จาก timestamp ในไฟล์กับวันนี้
-            const serverDate = new Date(data.stats.lastUpdate);
-            const todayDate = new Date();
-            
-            // เช็คว่าเป็นวันเดียวกันหรือไม่
-            const isSameDay = 
-              serverDate.getFullYear() === todayDate.getFullYear() &&
-              serverDate.getMonth() === todayDate.getMonth() &&
-              serverDate.getDate() === todayDate.getDate();
-            
-            if (isSameDay && data.stats.checkInsToday > 0) {
-              console.log("Server shows check-ins today, checking if user has checked in");
-              
-              // ตรวจสอบใน daily data ว่ามีผู้ใช้นี้หรือไม่
-              if (data.dailyData && data.dailyData[todayDate.toISOString().split('T')[0]]) {
-                const todayData = data.dailyData[todayDate.toISOString().split('T')[0]];
-                if (todayData.users && todayData.users.includes(userAddress.toLowerCase())) {
-                  console.log("User found in today's check-ins from server");
-                  localStorage.setItem(`checkedInToday_${userAddress}`, "true");
-                  setCheckedInToday(true);
-                } else {
-                  console.log("User not found in today's check-ins from server");
-                  setCheckedInToday(checkedInToday === "true");
-                }
-              } else {
-                // ไม่พบข้อมูลวันนี้ ใช้ค่าจาก localStorage
-                setCheckedInToday(checkedInToday === "true");
-              }
-            } else {
-              // ไม่ใช่วันนี้หรือไม่มีการเช็คอินวันนี้ ใช้ค่าจาก localStorage
-              setCheckedInToday(checkedInToday === "true");
-            }
-            
-            // อัพเดทค่า streak
-            if (data.stats.maxStreak > 0) {
-              // ในกรณีที่เซิร์ฟเวอร์มีค่า streak ที่น่าเชื่อถือ
-              const serverStreak = data.stats.maxStreak;
-              
-              if (serverStreak > streak) {
-                console.log(`Updating streak from ${streak} to ${serverStreak} (from server)`);
-                localStorage.setItem(`checkInStreak_${userAddress}`, serverStreak.toString());
-                setCheckInStreak(serverStreak);
-              } else {
-                setCheckInStreak(streak);
-              }
-            } else {
-              setCheckInStreak(streak);
-            }
-            
-            return checkedInToday === "true";
+          // อัพเดทค่า totalCheckIns จากไฟล์ของผู้ใช้
+          if (userData.totalCheckIns) {
+            console.log(`Found user's totalCheckIns in user file: ${userData.totalCheckIns}`);
+            localStorage.setItem(`totalCheckIns_${userAddress}`, userData.totalCheckIns.toString());
+            setTotalCheckIns(userData.totalCheckIns);
+          } else {
+            console.log("No totalCheckIns found in user file, using localStorage");
+            setTotalCheckIns(total);
           }
+          
+          // อัพเดทค่า streak จากไฟล์ของผู้ใช้
+          if (userData.currentStreak) {
+            console.log(`Found user's currentStreak in user file: ${userData.currentStreak}`);
+            localStorage.setItem(`checkInStreak_${userAddress}`, userData.currentStreak.toString());
+            setCheckInStreak(userData.currentStreak);
+          } else if (userData.maxStreak) {
+            console.log(`Found user's maxStreak in user file: ${userData.maxStreak}`);
+            localStorage.setItem(`checkInStreak_${userAddress}`, userData.maxStreak.toString());
+            setCheckInStreak(userData.maxStreak);
+          } else {
+            console.log("No streak info found in user file, using localStorage");
+            setCheckInStreak(streak);
+          }
+          
+          // ตรวจสอบว่าวันนี้ได้เช็คอินแล้วหรือยัง
+          const serverDate = new Date(userData.lastCheckIn);
+          const todayDate = new Date();
+          
+          // เช็คว่าเป็นวันเดียวกันหรือไม่
+          const isSameDay = 
+            serverDate.getFullYear() === todayDate.getFullYear() &&
+            serverDate.getMonth() === todayDate.getMonth() &&
+            serverDate.getDate() === todayDate.getDate();
+          
+          if (isSameDay) {
+            console.log("User has checked in today according to user file");
+            localStorage.setItem(`checkedInToday_${userAddress}`, "true");
+            setCheckedInToday(true);
+            return true;
+          } else {
+            console.log("User has not checked in today according to user file");
+            setCheckedInToday(checkedInToday === "true");
+          }
+          
+          return checkedInToday === "true";
+        } else {
+          console.log("Failed to load user stats file, using localStorage values only");
+          // ไม่สามารถโหลดข้อมูลผู้ใช้ได้ ใช้ค่าจาก localStorage
+          setCheckedInToday(checkedInToday === "true");
+          setCheckInStreak(streak);
+          setTotalCheckIns(total);
+          
+          return checkedInToday === "true";
         }
-      } catch (serverError) {
-        console.error("Error loading streak data from server:", serverError);
+      } catch (error) {
+        console.error("Error loading user stats:", error);
+        // กรณีเกิดข้อผิดพลาดในการโหลดไฟล์ผู้ใช้ ใช้ค่าจาก localStorage
+        setCheckedInToday(checkedInToday === "true");
+        setCheckInStreak(streak);
+        setTotalCheckIns(total);
+        
+        return checkedInToday === "true";
       }
-      
-      // ถ้าไม่สามารถโหลดข้อมูลจากเซิร์ฟเวอร์ได้ ใช้ค่าจาก localStorage
-      setCheckedInToday(checkedInToday === "true");
-      setCheckInStreak(streak);
-      setTotalCheckIns(total);
-      
-      return checkedInToday === "true";
     } catch (error) {
       console.error("Error loading GM data:", error);
       return false;
@@ -834,7 +829,26 @@ function App() {
       setCheckInStreak(newStreak);
       
       // อัปเดตจำนวน GM ทั้งหมด
-      const newTotal = totalCheckIns + 1;
+      // ต้องตรวจสอบว่า totalCheckIns ที่มีอยู่ถูกต้องหรือไม่
+      let newTotal = totalCheckIns;
+      
+      // ถ้า totalCheckIns เป็น 0 หรือ undefined แต่เพิ่งกด GM
+      // แสดงว่าน่าจะเป็นการ GM ครั้งแรก ให้ตั้งค่าเป็น 1
+      if (!newTotal || newTotal <= 0) {
+        newTotal = 1;
+        console.log(`Setting initial totalCheckIns to 1`);
+      } else {
+        // มีการกด GM ซ้ำ หรือกด GM ในวันที่ต่างกัน
+        if (lastDate !== today) {
+          // ถ้าเป็นวันที่ต่างกัน เพิ่ม 1
+          newTotal += 1;
+          console.log(`Incrementing totalCheckIns to ${newTotal}`);
+        } else {
+          // ถ้าเป็นวันเดียวกัน ไม่เพิ่ม (ป้องกันกรณีกด GM ซ้ำในวันเดียวกัน)
+          console.log(`Not incrementing totalCheckIns, already clicked today`);
+        }
+      }
+      
       localStorage.setItem(`totalCheckIns_${userAddress}`, newTotal.toString());
       setTotalCheckIns(newTotal);
       
@@ -1303,7 +1317,12 @@ function App() {
                 </div>
                 <div className="stat-item">
                   <span>Your Gm's</span>
-                  <span className="stat-value">{totalCheckIns}</span>
+                  <span 
+                    className="stat-value" 
+                    title={`Last updated: ${new Date().toLocaleString()}`}
+                  >
+                    {totalCheckIns > 0 ? totalCheckIns : (checkedInToday ? "1" : "0")}
+                  </span>
                 </div>
               </>
             )}
@@ -1373,6 +1392,11 @@ function App() {
           </div>
 
           <div className="leaderboard-content">
+            <div className="leaderboard-header-columns">
+              <div className="rank-header">Rank</div>
+              <div className="address-header">Address</div>
+              <div className="clicks-header">Clicks</div>
+            </div>
             <div className="leaderboard-list">
               {currentItems.map((entry, i) => {
                 const idx = startIndex + i;
@@ -1380,7 +1404,7 @@ function App() {
                   entry.user.toLowerCase() === signer?.address?.toLowerCase();
                 return (
                   <div
-                    key={entry.user}
+                    key={entry.user} 
                     className={[
                       "leaderboard-item",
                       idx < 3 ? `top-${idx + 1}` : "",
