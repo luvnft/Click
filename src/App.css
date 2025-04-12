@@ -456,7 +456,6 @@ body {
 
 /* คอลัมน์ Rank / Address / Clicks */
 .rank {
-
   color: #ffd700;
   width: 50px;
   text-align: center;
@@ -1209,14 +1208,17 @@ body {
 .leaderboard-item.top-1 .rank, 
 .leaderboard-item.top-1 .clicks {
   color: gold;
+  font-weight: bold;
 }
 
 .leaderboard-item.top-2 .rank,
 .leaderboard-item.top-2 .clicks {
-  color: gold;
+  color: silver;
+  font-weight: bold;
 }
 
 .leaderboard-item.top-3 .rank,
 .leaderboard-item.top-3 .clicks {
-  color: gold; /* bronze */
+  color: #cd7f32; /* bronze */
+  font-weight: bold;
 }
