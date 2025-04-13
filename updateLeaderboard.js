@@ -218,6 +218,8 @@ function calculateTotalCheckIns(dailyFilesData) {
     totalCheckIns = checkInsToday;
   }
   
+  // คืนค่ายอดรวมของทุกวัน
+  console.log(`Total accumulated check-ins from all days: ${totalCheckIns}`);
   return totalCheckIns;
 }
 
@@ -490,6 +492,13 @@ function updateCheckInStats(currentData, previousData) {
   console.log(`Daily stats for ${today}: ${todayStats.count} check-ins (from ${Object.keys(todayStats.users).length} users)`);
   log(`Check-ins summary: ${todayStats.count} total (+${newCheckInsToday} new, ${newUsers} first-time users)`);
   
+  // อัพเดตข้อมูล dailyFiles ด้วยเพื่อให้การคำนวณ total ถูกต้อง
+  if (dailyFilesData[`${today}.json`]) {
+    // อัพเดทข้อมูลในแคชให้ตรงกับที่บันทึกลงไฟล์
+    dailyFilesData[`${today}.json`] = { ...todayStats };
+    console.log(`Updated cached daily data for ${today} with count = ${todayStats.count}`);
+  }
+  
   // ----------------------------------------------------------
   // 3. อัพเดทข้อมูล streak ของแต่ละผู้ใช้
   // ----------------------------------------------------------
@@ -540,16 +549,24 @@ function updateCheckInStats(currentData, previousData) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const dateKey = d.toISOString().split('T')[0];
+    const dateFile = dateKey + '.json';
     
-    // เฉพาะวันนี้เท่านั้นที่นับ check-ins ลง lastSevenDays
-    if (i === 0) { // วันนี้
-      if (dailyFilesData[dateKey + '.json']) {
-        summaryStats.lastSevenDays[dateKey] = dailyFilesData[dateKey + '.json'].count;
-      } else {
-        summaryStats.lastSevenDays[dateKey] = 0;
-      }
+    // วันนี้ใช้ค่าเดียวกับ checkInsToday เพื่อให้ข้อมูลตรงกัน
+    if (i === 0) { // วันปัจจุบัน
+      console.log(`Day ${i} (${dateKey}): Using todayStats.count = ${todayStats.count} for consistency`);
+      summaryStats.lastSevenDays[dateKey] = todayStats.count;
+    }
+    // สำหรับวันอื่นๆ ดึงจากไฟล์ตามปกติ
+    else if (dailyFilesData[dateFile]) {
+      const fileCount = dailyFilesData[dateFile].count || 0;
+      const userCount = Object.keys(dailyFilesData[dateFile].users || {}).length;
+      const actualCount = Math.max(fileCount, userCount);
+      
+      console.log(`Day ${i} (${dateKey}): Found ${actualCount} check-ins in data file`);
+      summaryStats.lastSevenDays[dateKey] = actualCount;
     } else {
-      // วันก่อนหน้าให้นับเป็น 0 หมด
+      // ไม่มีข้อมูลสำหรับวันนี้
+      console.log(`Day ${i} (${dateKey}): No data file found, setting to 0`);
       summaryStats.lastSevenDays[dateKey] = 0;
     }
   }
@@ -591,7 +608,7 @@ function updateCheckInStats(currentData, previousData) {
   const compatPath = CONFIG.COMPAT_PATH;
   const compatData = {
     stats: {
-      totalCheckIns: summaryStats.totalCheckIns,
+      totalCheckIns: actualTotalCheckIns, // ใช้ค่าที่คำนวณจาก daily files
       maxStreak: summaryStats.maxStreak,
       checkInsToday: summaryStats.checkInsToday,
       lastUpdate: summaryStats.lastUpdate
@@ -690,16 +707,29 @@ async function main() {
     // Sort the data in descending order by click count
     result.sort((a, b) => Number(b.clicks) - Number(a.clicks));
     
+    // ตรวจสอบว่าเป็นวันใหม่หรือไม่
+    const today = new Date().toISOString().split('T')[0];
+    let previousLastUpdate = null;
+    
+    if (previousData && previousData.lastUpdate) {
+      previousLastUpdate = new Date(previousData.lastUpdate).toISOString().split('T')[0];
+      console.log(`Previous update date: ${previousLastUpdate}, Current date: ${today}`);
+      
+      // ถ้าเป็นวันใหม่ ให้รีเซ็ตค่า checkInsToday
+      if (previousLastUpdate !== today) {
+        console.log(`New day detected! Resetting daily check-ins counter.`);
+      }
+    }
+    
     // อัพเดทข้อมูล check-in stats
     const checkInStats = updateCheckInStats(result, previousData);
   
     // ตรวจสอบค่า totalCheckIns เพื่อความแน่ใจว่าถูกต้อง
     console.log(`Verifying totalCheckIns (${checkInStats.totalCheckIns}) vs checkInsToday (${checkInStats.checkInsToday})`);
-    if (checkInStats.totalCheckIns < checkInStats.checkInsToday) {
-      console.error(`Error detected: totalCheckIns (${checkInStats.totalCheckIns}) is less than checkInsToday (${checkInStats.checkInsToday})`);
-      console.log(`Correcting totalCheckIns to ${checkInStats.checkInsToday}`);
-      checkInStats.totalCheckIns = checkInStats.checkInsToday;
-    }
+    
+    // ใช้ค่าจริงจาก checkInStats ไม่ต้องแทนที่ด้วยค่าของวันนี้
+    const finalTotalCheckIns = checkInStats.totalCheckIns;
+    console.log(`Final totalCheckIns: ${finalTotalCheckIns} (accumulated from all days)`);
     
     // เพิ่ม timestamp และ metadata
     const leaderboardData = {
@@ -709,10 +739,10 @@ async function main() {
         totalUsers: result.length,
         checkIns: checkInStats
       },
-      totalCheckIns: checkInStats.totalCheckIns
+      totalCheckIns: finalTotalCheckIns
     };
   
-    console.log(`Saving leaderboard with ${result.length} users and ${checkInStats.totalCheckIns} total check-ins`);
+    console.log(`Saving leaderboard with ${result.length} users and ${finalTotalCheckIns} total check-ins`);
 
     // Write the result as a JSON file to the public folder
     safeWriteJSONFile(leaderboardFilePath, leaderboardData);
@@ -724,8 +754,8 @@ async function main() {
     
     if (checkinStatsData && checkinStatsData.stats) {
       // อัพเดทค่าที่ถูกต้อง
-      checkinStatsData.stats.totalCheckIns = checkInStats.totalCheckIns;
-      console.log(`Re-writing checkin_stats.json with corrected totalCheckIns=${checkInStats.totalCheckIns}`);
+      checkinStatsData.stats.totalCheckIns = finalTotalCheckIns;
+      console.log(`Re-writing checkin_stats.json with corrected totalCheckIns=${finalTotalCheckIns}`);
       
       // บันทึกไฟล์อีกครั้ง
       safeWriteJSONFile(checkinStatsPath, checkinStatsData);
