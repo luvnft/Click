@@ -440,44 +440,50 @@ function updateCheckInStats(currentData, previousData) {
     if (currentClicks > 0) {
       // ตรวจสอบเพิ่มเติมว่ามีการเพิ่มขึ้นของคะแนนหรือไม่
       const hasIncreased = currentClicks > prevClicks;
+      const clicksIncreased = currentClicks - prevClicks;
       
-      // กรณี 1: ยังไม่ได้ check-in วันนี้ และมีคลิกมากกว่า 0 และคะแนนเพิ่มขึ้น
-      if (!todayStats.users[userAddress] && hasIncreased) {
-        todayStats.users[userAddress] = true;
-        // ไม่เพิ่มค่า count ที่นี่ จะไปกำหนดในขั้นตอนสุดท้าย
-        newCheckInsToday++;
-        
-        if (prevClicks === 0) {
-          newUsers++;
-          log(`New user: ${userAddress} checked in with ${currentClicks} clicks`, 1);
+      // ********** การอัพเดท CHECK-IN อัตโนมัติ **********
+      // ถ้าผู้ใช้มีคลิกเพิ่มขึ้นอย่างน้อย 1 ครั้ง ให้ถือว่า check-in สำหรับวันนี้
+      if (hasIncreased) {
+        // ถ้ายังไม่ได้ check-in วันนี้ แต่มีคลิกเพิ่มขึ้น -> บันทึกเป็น check-in วันนี้
+        if (!todayStats.users[userAddress]) {
+          todayStats.users[userAddress] = true;
+          newCheckInsToday++;
+          
+          if (prevClicks === 0) {
+            newUsers++;
+            log(`New user: ${userAddress} checked in with ${currentClicks} clicks`, 1);
+          } else {
+            updatedUsers++;
+            log(`User ${userAddress} auto-checked-in today: ${prevClicks} -> ${currentClicks} (+${clicksIncreased} clicks)`, 1);
+          }
         } else {
-          updatedUsers++;
-          log(`User ${userAddress} checked in: ${prevClicks} -> ${currentClicks}`, 2);
+          // มี check-in แล้ว แต่ยังคลิกเพิ่ม
+          log(`User ${userAddress} already checked-in today, added more clicks: ${prevClicks} -> ${currentClicks} (+${clicksIncreased})`, 2);
         }
-      } else if (!todayStats.users[userAddress] && !hasIncreased) {
+      } else {
         // มีคะแนนแต่ไม่เพิ่มขึ้น - ไม่นับเป็น check-in
-        log(`User ${userAddress} has not increased clicks: ${prevClicks} = ${currentClicks}`, 2);
+        log(`User ${userAddress} has not increased clicks: ${prevClicks} = ${currentClicks}, no check-in recorded`, 2);
       }
       
-      // กรณี 2: ยังไม่ได้ check-in เมื่อวาน และมีคลิกมากกว่า 0
-      if (!yesterdayStats.users[userAddress] && hasIncreased) {
-        // ใช้วิธีสุ่มเพื่อกระจายผู้ใช้ระหว่างวันนี้และเมื่อวาน (เพื่อทดสอบ)
-        // ในระบบจริงควรใช้ข้อมูลเวลาจริง
-        const randomDay = Math.random() > 0.5;
+      // ตรวจสอบสำหรับวันก่อนหน้า (ถ้ายังไม่ได้เช็คอินวันก่อนหน้า)
+      // หากพบว่ามีคลิกเพิ่มขึ้นอย่างมีนัยสำคัญ (>5) และยังไม่ได้ check-in เมื่อวาน 
+      // มีโอกาสว่าคลิกได้เกิดในช่วงวันก่อนหน้า 
+      if (!yesterdayStats.users[userAddress] && clicksIncreased > 5) {
+        // แบ่งการ check-in ระหว่างวันนี้กับเมื่อวานตามสัดส่วนของคลิกที่เพิ่มขึ้น
+        // (สำหรับวัตถุประสงค์ในการกระจายข้อมูลเท่านั้น)
         
-        if (randomDay && !todayStats.users[userAddress]) {
-          // บันทึกเป็นวันนี้
+        // ถ้ายังไม่ได้ check-in วันนี้ ให้บันทึกเป็นวันนี้ (มีความสำคัญกว่า)
+        if (!todayStats.users[userAddress]) {
           todayStats.users[userAddress] = true;
-          // ไม่เพิ่มค่า count ที่นี่
-          log(`User ${userAddress} assigned to today with ${currentClicks} clicks`, 2);
-        } else if (!todayStats.users[userAddress]) {
-          // บันทึกเป็นเมื่อวาน
+          log(`User ${userAddress} assigned to today with ${currentClicks} clicks (large increase of ${clicksIncreased})`, 1);
+        } 
+        // ถ้า check-in วันนี้แล้ว และคลิกเพิ่มขึ้นมาก ให้บันทึกเมื่อวานด้วย
+        else {
           yesterdayStats.users[userAddress] = true;
-          // ปรับปรุงการคำนวณ count สำหรับเมื่อวานเช่นกัน
-          log(`User ${userAddress} assigned to yesterday with ${currentClicks} clicks`, 2);
+          log(`User ${userAddress} additionally assigned to yesterday with significant increase: +${clicksIncreased} clicks`, 1);
           
           // บันทึกข้อมูลเมื่อวานด้วย
-          // กำหนดค่า count ก่อนบันทึก
           yesterdayStats.count = Object.keys(yesterdayStats.users).length;
           safeWriteJSONFile(yesterdayStatsPath, yesterdayStats);
         }
@@ -710,6 +716,7 @@ async function main() {
     // ตรวจสอบว่าเป็นวันใหม่หรือไม่
     const today = new Date().toISOString().split('T')[0];
     let previousLastUpdate = null;
+    let isNewDay = false;
     
     if (previousData && previousData.lastUpdate) {
       previousLastUpdate = new Date(previousData.lastUpdate).toISOString().split('T')[0];
@@ -717,7 +724,19 @@ async function main() {
       
       // ถ้าเป็นวันใหม่ ให้รีเซ็ตค่า checkInsToday
       if (previousLastUpdate !== today) {
-        console.log(`New day detected! Resetting daily check-ins counter.`);
+        isNewDay = true;
+        console.log(`New day detected! (${previousLastUpdate} -> ${today})`);
+        console.log(`Resetting daily check-ins counter and preparing for new day.`);
+        
+        // ตรวจสอบไฟล์ข้อมูลวันนี้
+        const todayStatsPath = `${CONFIG.DAILY_STATS_DIR}/${today}.json`;
+        
+        // หากพิมพ์ไฟล์วันนี้ว่างหรือไม่มี ให้สร้างใหม่
+        if (!fs.existsSync(todayStatsPath)) {
+          console.log(`Creating new daily stats file for ${today}`);
+          ensureDirectoryExists(path.dirname(todayStatsPath));
+          safeWriteJSONFile(todayStatsPath, { count: 0, users: {} });
+        }
       }
     }
     
@@ -730,6 +749,15 @@ async function main() {
     // ใช้ค่าจริงจาก checkInStats ไม่ต้องแทนที่ด้วยค่าของวันนี้
     const finalTotalCheckIns = checkInStats.totalCheckIns;
     console.log(`Final totalCheckIns: ${finalTotalCheckIns} (accumulated from all days)`);
+    
+    // แสดงสรุปถ้าเป็นวันใหม่
+    if (isNewDay) {
+      console.log(`--- Day Summary (${today}) ---`);
+      console.log(`Total users with clicks: ${result.length}`);
+      console.log(`New check-ins today: ${checkInStats.checkInsToday}`);
+      console.log(`All-time total check-ins: ${finalTotalCheckIns}`);
+      console.log(`----------------------------`);
+    }
     
     // เพิ่ม timestamp และ metadata
     const leaderboardData = {
