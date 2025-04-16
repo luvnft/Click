@@ -1222,3 +1222,87 @@ body {
   color: #cd7f32; /* bronze */
   font-weight: bold;
 }
+
+/* สไตล์สำหรับปุ่มเลือก Wallet */
+.wallet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.wallet-button {
+  display: flex;
+  align-items: center;
+  background: rgba(30, 36, 60, 0.8);
+  border: 1px solid rgba(79, 209, 197, 0.3);
+  border-radius: 10px;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-align: left;
+}
+
+.wallet-button:hover {
+  background: rgba(79, 209, 197, 0.2);
+  transform: translateY(-2px);
+}
+
+.wallet-icon {
+  font-size: 24px;
+  margin-right: 15px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.wallet-name {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* สไตล์สำหรับ Modal เลือก Wallet */
+.wallets-modal {
+  width: 90%;
+  max-width: 360px;
+}
+
+/* Wallet selector modal */
+.wallet-modal {
+  max-width: 360px;
+  background: rgba(20, 30, 48, 0.95);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.wallet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.wallet-button {
+  display: flex;
+  align-items: center;
+  background: rgba(30, 36, 60, 0.8);
+  border: 1px solid rgba(79, 209, 197, 0.3);
+  border-radius: 10px;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-align: left;
+}
+
+.wallet-button:hover {
+  background: rgba(79, 209, 197, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 209, 197, 0.2);
+}
+
+.wallet-icon {
+  font-size: 24px;
+  margin-right: 15px;
+  min-width: 24px;
+  text-align: center;
+}

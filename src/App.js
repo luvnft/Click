@@ -56,6 +56,111 @@ function App() {
   // เพิ่ม state สำหรับตรวจสอบว่าแอปโหลดเสร็จหรือยัง
   const [appLoaded, setAppLoaded] = useState(false);
 
+  // เพิ่มตัวแปร state เก็บสถานะเครือข่าย
+  const [isOnCorrectNetwork, setIsOnCorrectNetwork] = useState(false);
+
+  // เพิ่มฟังก์ชัน delay สำหรับรอระหว่าง transaction
+  const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  // เพิ่ม state เก็บเวลา transaction ล่าสุด
+  const [lastTxTime, setLastTxTime] = useState(0);
+
+  // เพิ่ม state สำหรับจัดการหน้าต่างเลือก wallet
+  const [showWalletModal, setShowWalletModal] = useState(false);
+
+  // ───────────────────────────────────────────────────────────────────
+  // โค้ดสำหรับการเลือก wallet
+  // ───────────────────────────────────────────────────────────────────
+  const detectWallets = () => {
+    const wallets = [];
+    
+    if (window.ethereum) {
+      // MetaMask
+      if (window.ethereum.isMetaMask) 
+        wallets.push({ name: "MetaMask", provider: window.ethereum, icon: "🦊" });
+      
+      // Coinbase
+      if (window.ethereum.isCoinbaseWallet) 
+        wallets.push({ name: "Coinbase", provider: window.ethereum, icon: "📱" });
+      
+      // Trust Wallet
+      if (window.ethereum.isTrust) 
+        wallets.push({ name: "Trust", provider: window.ethereum, icon: "🔒" });
+      
+      // Brave
+      if (window.ethereum.isBraveWallet) 
+        wallets.push({ name: "Brave", provider: window.ethereum, icon: "🦁" });
+      
+      // มี wallet แต่ไม่สามารถระบุชนิดได้
+      if (wallets.length === 0) {
+        wallets.push({ name: "Browser Wallet", provider: window.ethereum, icon: "🌐" });
+      }
+    }
+    
+    return wallets;
+  };
+
+  // ฟังก์ชันเปิดหน้าต่างเลือก wallet
+  const openWalletSelector = () => {
+    // ถ้ากำลังเชื่อมต่ออยู่แล้ว ให้ออกจากฟังก์ชัน
+    if (isConnected || isConnecting) return;
+    
+    const availableWallets = detectWallets();
+    
+    if (availableWallets.length === 0) {
+      toast.error("ไม่พบ wallet ในเบราว์เซอร์ กรุณาติดตั้ง MetaMask หรือ wallet อื่นก่อน");
+      return;
+    }
+    
+    if (availableWallets.length === 1) {
+      // ถ้ามีเพียง wallet เดียว เชื่อมต่อโดยตรง
+      connectWallet();
+      return;
+    }
+    
+    // แสดงหน้าต่างเลือก wallet
+    setShowWalletModal(true);
+  };
+
+  // ฟังก์ชันเมื่อเลือก wallet
+  const handleSelectWallet = (provider) => {
+    window.ethereum = provider;
+    setShowWalletModal(false);
+    connectWallet();
+  };
+
+  // Component สำหรับแสดงหน้าต่างเลือก wallet
+  const WalletSelectorModal = () => {
+    if (!showWalletModal) return null;
+    
+    const wallets = detectWallets();
+    
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content wallet-modal">
+          <div className="modal-header">
+            <h2>เลือก Wallet</h2>
+            <button className="close-button" onClick={() => setShowWalletModal(false)}>×</button>
+          </div>
+          <div className="modal-body">
+            <div className="wallet-list">
+              {wallets.map((wallet, index) => (
+                <button
+                  key={index}
+                  className="wallet-button"
+                  onClick={() => handleSelectWallet(wallet.provider)}
+                >
+                  <span className="wallet-icon">{wallet.icon}</span>
+                  <span className="wallet-name">{wallet.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // ───────────────────────────────────────────────────────────────────
   // ตั้งค่าเสียง BGM + Sound Effect
   // ───────────────────────────────────────────────────────────────────
@@ -149,11 +254,17 @@ function App() {
   // ───────────────────────────────────────────────────────────────────
   // เช็คว่าอยู่บนเครือข่าย Tea Sepolia หรือไม่
   // ───────────────────────────────────────────────────────────────────
-  const setupNetwork = async () => {
+  const setupNetwork = async (forceCheck = false) => {
     if (!window.ethereum) {
       toast.error("Please install MetaMask!");
       return false;
     }
+    
+    // ถ้าไม่บังคับตรวจสอบและรู้แล้วว่าอยู่บนเครือข่ายที่ถูกต้อง
+    if (!forceCheck && isOnCorrectNetwork) {
+      return true;
+    }
+    
     try {
       const currentChainId = await window.ethereum.request({
         method: "eth_chainId",
@@ -166,12 +277,15 @@ function App() {
           });
         } catch {
           toast.error("Please switch to Tea Sepolia manually");
+          setIsOnCorrectNetwork(false);
           return false;
         }
       }
+      setIsOnCorrectNetwork(true);
       return true;
     } catch {
       toast.error("Network setup failed");
+      setIsOnCorrectNetwork(false);
       return false;
     }
   };
@@ -465,101 +579,73 @@ function App() {
         clickAudioRef.current.currentTime = 0;
         clickAudioRef.current.play().catch(() => {});
       }
-
-      // ส่ง transaction ไปยัง smart contract
-      const tx = await contract.click();
-      setPendingTransactions((prev) => new Set(prev).add(tx.hash));
-      toast.info("Transaction sent.");
-
-      // รอให้ transaction สำเร็จ
-      const receipt = await waitForTransaction(tx);
-
-      if (receipt.status === 1) {
-        // อัพเดทข้อมูล on-chain
-        await loadBlockchainData();
-        
-        // เพิ่มข้อมูลลงใน leaderboard ชั่วคราวเพื่อให้แสดงอันดับได้ถูกต้อง
-        try {
-          if (signer) {
-            const addr = await signer.getAddress();
-            // ค้นหาว่ามีในลีดเดอร์บอร์ดหรือไม่
-            const existingIndex = leaderboard.findIndex(entry => 
-              entry.user.toLowerCase() === addr.toLowerCase()
-            );
-            
-            // ถ้ามีแล้วให้ตรวจสอบว่าอันดับเปลี่ยนไปหรือไม่
-            if (existingIndex >= 0) {
-              // อัพเดทค่าคลิกในลีดเดอร์บอร์ดเป็นค่าล่าสุด
-              const updatedLeaderboard = [...leaderboard];
-              updatedLeaderboard[existingIndex] = {
-                ...updatedLeaderboard[existingIndex],
-                clicks: myClicks + 1 // เพิ่มค่าไปก่อน 1 เนื่องจาก myClicks ยังไม่อัพเดท
-              };
-              
-              // จัดเรียงใหม่และหาอันดับ
-              updatedLeaderboard.sort((a, b) => Number(b.clicks) - Number(a.clicks));
-              const newIndex = updatedLeaderboard.findIndex(entry => 
-                entry.user.toLowerCase() === addr.toLowerCase()
-              );
-              
-              setLeaderboard(updatedLeaderboard);
-              setUserRank(newIndex + 1);
-            } else if (myClicks > 0) {
-              // ถ้าไม่พบในลีดเดอร์บอร์ดแต่มีคลิก ให้เพิ่มเข้าไป
-              const newEntry = {
-                user: addr,
-                clicks: myClicks + 1 // เพิ่มค่าไปก่อน 1
-              };
-              
-              const updatedLeaderboard = [...leaderboard, newEntry];
-              updatedLeaderboard.sort((a, b) => Number(b.clicks) - Number(a.clicks));
-              
-              const newIndex = updatedLeaderboard.findIndex(entry => 
-                entry.user.toLowerCase() === addr.toLowerCase()
-              );
-              
-              setLeaderboard(updatedLeaderboard);
-              setUserRank(newIndex + 1);
-            }
-          }
-        } catch (error) {
-          console.error("Error updating rank after click:", error);
-        }
-
-        // แสดงข้อความสำเร็จพร้อมลิงก์ไปยัง block explorer
-        toast.success(
-          <div>
-            Click successful! 🎉
-            <br />
-            <a
-              href={`https://sepolia.tea.xyz/tx/${tx.hash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "#4fd1c5" }}
-            >
-              View Transaction
-            </a>
-          </div>,
-        );
-
-        // เพิ่มจำนวนคลิกวันนี้และบันทึกลง localStorage ตาม wallet address
-        const userAddress = await signer.getAddress();
-        setMyTodayClicks((prev) => {
-          const next = prev + 1;
-          localStorage.setItem(`myTodayClicks_${userAddress}`, next.toString());
-          return next;
-        });
+      
+      // เพิ่ม delay ระหว่าง transaction เพื่อป้องกัน rate limit
+      const now = Date.now();
+      const timeSinceLastTx = now - lastTxTime;
+      if (timeSinceLastTx < 300) { // ต้องห่างกัน 2 วินาทีขึ้นไป
+        const waitTime = 300 - timeSinceLastTx;
+        toast.info(`Please wait ${Math.ceil(waitTime/1000)} seconds before next click`);
+        await delay(waitTime);
       }
+      
+      // บันทึกเวลาส่ง transaction ล่าสุด
+      setLastTxTime(Date.now());
 
-      // ลบ transaction ออกจากรายการ pending
-      setPendingTransactions((prev) => {
-        const next = new Set(prev);
-        next.delete(tx.hash);
+      // ส่ง transaction แบบไม่ระบุ gas price
+      const tx = await contract.click();
+      
+      // เพิ่ม transaction ไปที่ pending และอัพเดต UI ทันที (optimistic)
+      setPendingTransactions((prev) => new Set(prev).add(tx.hash));
+      setMyClicks(prev => prev + 1);
+      setTotalClicks(prev => prev + 1);
+      
+      // เพิ่มจำนวนคลิกวันนี้ทันที
+      const userAddress = await signer.getAddress();
+      setMyTodayClicks((prev) => {
+        const next = prev + 1;
+        localStorage.setItem(`myTodayClicks_${userAddress}`, next.toString());
         return next;
       });
+
+      // แสดงข้อความส่ง transaction พร้อมลิงก์
+      toast.info(
+        <div>
+          Transaction sent! 
+          <br />
+          <a
+            href={`https://sepolia.tea.xyz/tx/${tx.hash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#4fd1c5" }}
+          >
+            View on Explorer
+          </a>
+        </div>
+      );
+
+      // ลบออกจาก pending หลังจาก 30 วินาที (แทนการรอ confirmation)
+      setTimeout(() => {
+        setPendingTransactions(prev => {
+          const next = new Set(prev);
+          next.delete(tx.hash);
+          return next;
+        });
+      }, 30000);
+      
     } catch (err) {
       console.error("Click error:", err);
-      toast.error("An unexpected error occurred.");
+      
+      if (err.error && err.error.status === 429) {
+        toast.warning("Too many requests. Please wait a moment before clicking again.");
+        await delay(3000);
+      } else if (err.code === "INSUFFICIENT_FUNDS") {
+        toast.error("Not enough TEA for gas");
+      } else if (err.code === "ACTION_REJECTED") {
+        toast.error("Transaction rejected by user");
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 
@@ -626,13 +712,14 @@ function App() {
       }
     });
 
-    const handleChainChange = async (chainId) => {
+    const handleChainChange = (chainId) => {
       if (chainId !== TEA_CHAIN_ID_HEX) {
         setIsConnected(false);
+        setIsOnCorrectNetwork(false);
         toast.error("Please switch to Tea Sepolia");
       } else {
-        await loadBlockchainData();
-        // ไม่โหลด leaderboard off-chain ซ้ำ
+        setIsOnCorrectNetwork(true);
+        loadBlockchainData();
       }
     };
 
@@ -1227,8 +1314,8 @@ function App() {
   // ───────────────────────────────────────────────────────────────────
   const waitForTransaction = async (tx) => {
     let retries = 0;
-    const maxRetries = 5;
-    const retryDelay = 3000; // 3 วินาที
+    const maxRetries = 2;
+    const retryDelay = 15000; // 15 วินาที
     
     while (retries < maxRetries) {
       try {
@@ -1341,7 +1428,7 @@ function App() {
       <div className="center-panel">
         <div className="main-content">
           <div className="click-button-container">
-            <button onClick={handleClick} className="click-button">
+            <button onClick={isConnected ? handleClick : openWalletSelector} className="click-button">
               {isConnected ? "CLICK" : "Connect Wallet"}
             </button>
             {renderPendingTxs()}
@@ -1445,6 +1532,7 @@ function App() {
       </div>
 
       {renderCheckInModal()}
+      <WalletSelectorModal />
       <ToastContainer position="bottom-left" theme="dark" />
       <Analytics />
     </div>
