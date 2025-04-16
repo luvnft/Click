@@ -32,14 +32,11 @@ jobs:
       - name: Run update script
         run: npm run update-leaderboard
 
-      - name: Commit leaderboard changes if any
+      - name: Commit leaderboard and stats changes if any
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet public/leaderboard.json; then
-            git add public/leaderboard.json
-            git commit -m "📊 Update leaderboard data [skip ci]"
-            git push origin main
-          else
-            echo "No changes in public/leaderboard.json"
-          fi
+          git add public/leaderboard.json public/checkin_stats.json public/stats/
+          git status
+          git diff --staged --quiet || git commit -m "📊 Update leaderboard and stats data [skip ci]"
+          git push origin main
