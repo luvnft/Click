@@ -2,7 +2,7 @@
 
 Click Counter is a decentralized application (dApp) built on the Tea Sepolia Testnet. This interactive web3 game allows users to click a button to increase their counter on the blockchain, with a live leaderboard showing the top clickers.
 
-![Click Counter dApp](https://example.com/screenshot.png)
+![Click Counter dApp]
 
 ## Features
 

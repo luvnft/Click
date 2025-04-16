@@ -1,15 +1,8 @@
 {
-<<<<<<< HEAD
   "lastUpdate": "2025-04-16T12:47:34.495Z",
   "totalUsers": 2373,
   "checkInsToday": 2065,
   "totalCheckIns": 3547,
-=======
-  "lastUpdate": "2025-04-16T10:42:09.434Z",
-  "totalUsers": 2258,
-  "checkInsToday": 1948,
-  "totalCheckIns": 3413,
->>>>>>> 43e7c13 (Local updates before rebase)
   "maxStreak": 1,
   "lastSevenDays": {
     "2025-04-12": 532,

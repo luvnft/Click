@@ -1,15 +1,8 @@
 {
-<<<<<<< HEAD
   "lastUpdate": "2025-04-16T13:32:16.404Z",
   "totalUsers": 2436,
   "checkInsToday": 2128,
   "totalCheckIns": 3698,
-=======
-  "lastUpdate": "2025-04-16T14:09:12.866Z",
-  "totalUsers": 2458,
-  "checkInsToday": 2151,
-  "totalCheckIns": 3616,
->>>>>>> 43e7c13 (Local updates before rebase)
   "maxStreak": 1,
   "lastSevenDays": {
     "2025-04-12": 532,
@@ -20,13 +13,8 @@
     "2025-04-07": 0,
     "2025-04-06": 0,
     "2025-04-13": 151,
-<<<<<<< HEAD
     "2025-04-16": 2128,
     "2025-04-15": 887,
-=======
-    "2025-04-16": 2151,
-    "2025-04-15": 782,
->>>>>>> 43e7c13 (Local updates before rebase)
     "2025-04-14": 0
   }
 }

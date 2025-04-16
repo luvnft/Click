@@ -1,18 +1,9 @@
 {
-<<<<<<< HEAD
-  "currentStreak": 2,
-  "maxStreak": 2,
-  "lastCheckIn": "2025-04-16",
-  "totalCheckIns": 3,
-  "months": {
-    "2025-04": 3
-=======
-  "currentStreak": 1,
-  "maxStreak": 1,
-  "lastCheckIn": "2025-04-16",
-  "totalCheckIns": 2,
-  "months": {
-    "2025-04": 2
->>>>>>> 43e7c13 (Local updates before rebase)
-  }
+    "currentStreak":  1,
+    "months":  {
+                   "2025-04":  1
+               },
+    "maxStreak":  1,
+    "lastCheckIn":  "2025-04-16",
+    "totalCheckIns":  1
 }
