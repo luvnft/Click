@@ -7,6 +7,7 @@ import abi from "./ClickCounterABI.json";
 import bgMusicFile from "./assets/sounds/dont-talk.mp3";
 import clickSoundFile from "./assets/effects/click.mp3";
 import { Analytics } from "@vercel/analytics/react";
+import { FaGithub, FaXTwitter } from "react-icons/fa6";
 
 const CONTRACT_ADDRESS = "0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45";
 const TEA_CHAIN_ID_HEX = "0x27EA"; // Tea Sepolia (10218)
@@ -1457,8 +1458,8 @@ function App() {
             <h2>🏆 Leaderboard</h2>
             {lastLeaderboardUpdate && (
               <div className="last-update">
-                Last update: {lastLeaderboardUpdate.toLocaleString()}
-              </div>
+                Snapshot is scheduled for 23-04-25 00:00 UTC.
+              </div>            
             )}
             {isConnected && (
               <div className="user-rank-display">
@@ -1535,6 +1536,17 @@ function App() {
       <WalletSelectorModal />
       <ToastContainer position="bottom-left" theme="dark" />
       <Analytics />
+
+      {/* Social Links */} 
+      <div className="social-links">
+        <a href="https://github.com/jobjab-dev/Clickonchain.xyz" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <FaGithub />
+        </a> 
+        <a href="https://x.com/jobjab_eth" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+          <FaXTwitter />
+        </a>
+      </div>
+
     </div>
   );
 }

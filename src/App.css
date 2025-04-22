@@ -1306,3 +1306,25 @@ body {
   min-width: 24px;
   text-align: center;
 }
+
+/* Social Links */
+.social-links {
+  position: fixed;
+  bottom: 20px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.social-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 45px;
+  transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+  color: #aaa;
+}
