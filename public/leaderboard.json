@@ -1,9 +1,9 @@
 {
-  "lastUpdate": "2025-04-23T12:23:06.165Z",
+  "lastUpdate": "2025-04-23T13:23:37.731Z",
   "data": [
     {
       "user": "0xE90e7CEd11aD3b68585C8Df1A2900e9b86F76a2d",
-      "clicks": "11928"
+      "clicks": "12073"
     },
     {
       "user": "0x5D05cFc5B225238b0Ec9c86c14f560cF4334f6Cb",
@@ -11,11 +11,11 @@
     },
     {
       "user": "0x2559525b7aDE886069697416Af2d8c7597E7A2ac",
-      "clicks": "10430"
+      "clicks": "10547"
     },
     {
       "user": "0x7088175ea12bDeEffDF7207B57402f9D5f0f5C4C",
-      "clicks": "9605"
+      "clicks": "9723"
     },
     {
       "user": "0x17c34d0c3727ED8c403a0CCb418A5B06b3112484",
@@ -26,36 +26,36 @@
       "clicks": "9584"
     },
     {
+      "user": "0xF4Cc8A6a89cEFdbdb515EaB3AC7d76C7F32BD61B",
+      "clicks": "9502"
+    },
+    {
       "user": "0x4Fca7F4ce37B610b7183F9d1e25e2dF1f8F5BBA4",
       "clicks": "9497"
     },
     {
-      "user": "0xF4Cc8A6a89cEFdbdb515EaB3AC7d76C7F32BD61B",
-      "clicks": "9386"
+      "user": "0xd002E731B302286009AbAAFD5E05A9853f5f3002",
+      "clicks": "9434"
     },
     {
       "user": "0x953D88ACA37CeD9814342FAf67b4b6732361bd2c",
       "clicks": "9376"
     },
     {
-      "user": "0xd002E731B302286009AbAAFD5E05A9853f5f3002",
-      "clicks": "9319"
+      "user": "0x1683aD175A796550C954BA44c8D6eAfb3C6B080c",
+      "clicks": "9232"
     },
     {
       "user": "0x59644425FB58eB1d274C927A35D8a5cd467918D2",
       "clicks": "9136"
     },
     {
-      "user": "0x1683aD175A796550C954BA44c8D6eAfb3C6B080c",
-      "clicks": "9119"
-    },
-    {
       "user": "0x38e106b645c683d4f0d7744F9c26Aaa6Dcf4cBca",
-      "clicks": "8869"
+      "clicks": "8984"
     },
     {
       "user": "0x584cD3647D4C3B3ac4F6514272e03C47EA43eFd2",
-      "clicks": "8842"
+      "clicks": "8962"
     },
     {
       "user": "0x5f81F2fbdE2B89BA0bF9c0C4d6CC15e83B08B686",
@@ -139,7 +139,7 @@
     },
     {
       "user": "0x81876c483Df7169deEF0DC77308cf1592fc48185",
-      "clicks": "2464"
+      "clicks": "2465"
     },
     {
       "user": "0xDB235928E82F8870499047634720CbD3be357D39",
@@ -570,6 +570,10 @@
       "clicks": "683"
     },
     {
+      "user": "0x03d0Ad8C61dCe0a4db3A876989a78dA8cd90FB74",
+      "clicks": "673"
+    },
+    {
       "user": "0x519290b3641D881a6AB5Df4C1b4494FaF1ccBC64",
       "clicks": "669"
     },
@@ -580,10 +584,6 @@
     {
       "user": "0xa7fA5b7B0F806Bb21c346681353A342bd7056228",
       "clicks": "662"
-    },
-    {
-      "user": "0x03d0Ad8C61dCe0a4db3A876989a78dA8cd90FB74",
-      "clicks": "657"
     },
     {
       "user": "0xF32A14F406aAC9c52E97E3B4Ce18ec29e38aC5a8",
@@ -610,8 +610,16 @@
       "clicks": "619"
     },
     {
+      "user": "0x1eFc64fE787A675963e277f4aB294dBa55645EFb",
+      "clicks": "616"
+    },
+    {
       "user": "0xa83Abc1C88bF9810B35FdDa26f5DD67Cdd702662",
       "clicks": "611"
+    },
+    {
+      "user": "0x9967bE8adB070CE1FdC2089f30904067494f2B65",
+      "clicks": "610"
     },
     {
       "user": "0xbb657C1dddAdb0D6f85e7969068Add50aa35Ef74",
@@ -620,10 +628,6 @@
     {
       "user": "0xaA2BF8EAD04B691a8db1BF1CCB0D960e3A13bb82",
       "clicks": "603"
-    },
-    {
-      "user": "0x1eFc64fE787A675963e277f4aB294dBa55645EFb",
-      "clicks": "602"
     },
     {
       "user": "0xAf4FD13c1A0c8d080587AD47D1EA3b15Ae21355B",
@@ -674,6 +678,10 @@
       "clicks": "569"
     },
     {
+      "user": "0x0747D3b2fe155eb903Df8f996DD8b6D0c50dE530",
+      "clicks": "564"
+    },
+    {
       "user": "0xbB69F616A6AC2C1B5B05a10300ED9995CD26e31B",
       "clicks": "564"
     },
@@ -682,16 +690,16 @@
       "clicks": "564"
     },
     {
-      "user": "0x0747D3b2fe155eb903Df8f996DD8b6D0c50dE530",
-      "clicks": "563"
-    },
-    {
       "user": "0xa34f4F6f3454b1DC730FA9C86e75763283497582",
       "clicks": "561"
     },
     {
       "user": "0xb18a961A3FdF1edb1F5086f6773fCe27b5FAf014",
       "clicks": "550"
+    },
+    {
+      "user": "0x870e748Da91050411869562Bf185237FA3FDEaaB",
+      "clicks": "548"
     },
     {
       "user": "0x02ba4e147529aD6895F3011aa0b3e04E6b4625E4",
@@ -704,10 +712,6 @@
     {
       "user": "0x8EA606FF016Ad2b3b3Ac711A6FbAC96533E099bE",
       "clicks": "539"
-    },
-    {
-      "user": "0x870e748Da91050411869562Bf185237FA3FDEaaB",
-      "clicks": "533"
     },
     {
       "user": "0x2136419a37c9bF47f520696dD7C2Fac458E44A77",
@@ -758,6 +762,10 @@
       "clicks": "500"
     },
     {
+      "user": "0x0A642721851F9c98eEF5eD27Bd1De1D3b7c4935d",
+      "clicks": "494"
+    },
+    {
       "user": "0x5C7FFe17f2618eA711F6F318ee9cbA9b0c2a85Ed",
       "clicks": "487"
     },
@@ -770,10 +778,6 @@
       "clicks": "481"
     },
     {
-      "user": "0x0A642721851F9c98eEF5eD27Bd1De1D3b7c4935d",
-      "clicks": "479"
-    },
-    {
       "user": "0x0a2d8E5e7620fEe7C8911BB7C43Ea1C3B030Eb53",
       "clicks": "479"
     },
@@ -784,10 +788,6 @@
     {
       "user": "0x381F3445B5624C536578f728a8CF6E47a5794206",
       "clicks": "464"
-    },
-    {
-      "user": "0x9967bE8adB070CE1FdC2089f30904067494f2B65",
-      "clicks": "462"
     },
     {
       "user": "0x71084dcA47c8b373510E1949d147c6Df824FD7b7",
@@ -860,6 +860,10 @@
     {
       "user": "0xa6e287a5494B87d3a2B4B650aa84Bc6591fa8F7b",
       "clicks": "421"
+    },
+    {
+      "user": "0x838eFc1775003517d798158206D80108ecd7D8F9",
+      "clicks": "419"
     },
     {
       "user": "0x62864c2E0Bb372a7ad5171737c7B6456A371a068",
@@ -963,11 +967,7 @@
     },
     {
       "user": "0x29F08a27911bbCd0E01E8B1D97ec3cA187B6351D",
-      "clicks": "376"
-    },
-    {
-      "user": "0x838eFc1775003517d798158206D80108ecd7D8F9",
-      "clicks": "374"
+      "clicks": "377"
     },
     {
       "user": "0xdA44C67DbB54dda47E6F8adc0810F91A3E62AA17",
@@ -1410,16 +1410,16 @@
       "clicks": "281"
     },
     {
+      "user": "0x59139d70FF6908b25C90f07B924CA80C51C43B2D",
+      "clicks": "280"
+    },
+    {
       "user": "0x58E708E69A042808DD6F5108929b09983E4A1676",
       "clicks": "280"
     },
     {
       "user": "0x9A1FBFfD5E111a3BE728A2cF2544eD285a585Dc8",
       "clicks": "278"
-    },
-    {
-      "user": "0x59139d70FF6908b25C90f07B924CA80C51C43B2D",
-      "clicks": "276"
     },
     {
       "user": "0xe840ADFE55d1326c578b1444D8D1e81598f0df3b",
@@ -2446,6 +2446,10 @@
       "clicks": "170"
     },
     {
+      "user": "0x9ee0204fe6e640a23e0d8a2101A5AFA62e29AE43",
+      "clicks": "170"
+    },
+    {
       "user": "0x0000c1F4ED61e329e1E32B376Fd96DA5a051E6e0",
       "clicks": "169"
     },
@@ -3090,10 +3094,6 @@
       "clicks": "134"
     },
     {
-      "user": "0x9ee0204fe6e640a23e0d8a2101A5AFA62e29AE43",
-      "clicks": "134"
-    },
-    {
       "user": "0xb38b5D49811A55FAc48048636301cE60A13277E4",
       "clicks": "134"
     },
@@ -3658,6 +3658,10 @@
       "clicks": "109"
     },
     {
+      "user": "0xDCE3133947b666c344C49299ea4599b39eaC0A71",
+      "clicks": "108"
+    },
+    {
       "user": "0x62889087010de58C37854d4c9aA1e1A6D0d640B2",
       "clicks": "108"
     },
@@ -3680,10 +3684,6 @@
     {
       "user": "0xc4322b842681752A14B66b427248A27F6D7ddCC7",
       "clicks": "107"
-    },
-    {
-      "user": "0xDCE3133947b666c344C49299ea4599b39eaC0A71",
-      "clicks": "106"
     },
     {
       "user": "0x8790bdE565e9A9e6a74930DB2721fD4cA2C1F86a",
@@ -4240,6 +4240,10 @@
     {
       "user": "0x00008cb0349f995785BeF114552AFb43744cbC91",
       "clicks": "81"
+    },
+    {
+      "user": "0x134DD71b64587BF19dD257deFF265cd4b067b01D",
+      "clicks": "80"
     },
     {
       "user": "0x0000AF9F074DDac3d87E1Ac9683F0a0Ff109546B",
@@ -5000,10 +5004,6 @@
     {
       "user": "0xa3f36f7A5154Dade4c3Eb3f138fdbc64DfADB4c7",
       "clicks": "56"
-    },
-    {
-      "user": "0x134DD71b64587BF19dD257deFF265cd4b067b01D",
-      "clicks": "55"
     },
     {
       "user": "0xfD308dfDB978b8eD3675A90394040C5B44989E8c",
@@ -16470,6 +16470,10 @@
       "clicks": "2"
     },
     {
+      "user": "0xE34D524095E3917777A9E987a46078837268FFFB",
+      "clicks": "2"
+    },
+    {
       "user": "0x774f677A3BfaD964517d9486d6b3A114CaF46F06",
       "clicks": "1"
     },
@@ -17863,12 +17867,12 @@
     }
   ],
   "stats": {
-    "totalUsers": 4465,
+    "totalUsers": 4466,
     "checkIns": {
-      "checkInsToday": 84,
-      "totalCheckIns": 10029,
+      "checkInsToday": 96,
+      "totalCheckIns": 10042,
       "maxStreak": 1
     }
   },
-  "totalCheckIns": 10029
+  "totalCheckIns": 10042
 }
