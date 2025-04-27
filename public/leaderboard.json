@@ -1,5 +1,5 @@
 {
-  "lastUpdate": "2025-04-27T20:12:26.818Z",
+  "lastUpdate": "2025-04-27T21:10:18.975Z",
   "data": [
     {
       "user": "0x5D05cFc5B225238b0Ec9c86c14f560cF4334f6Cb",
@@ -1030,6 +1030,10 @@
       "clicks": "385"
     },
     {
+      "user": "0x72bFa452727d7203D20f8E68583F1B88E078271a",
+      "clicks": "385"
+    },
+    {
       "user": "0xbc8C42f2748C18d23387381C5f6f2AC266d777a3",
       "clicks": "381"
     },
@@ -1211,10 +1215,6 @@
     },
     {
       "user": "0x2804bf64A2f0E749d877cb65407fc69D55712601",
-      "clicks": "339"
-    },
-    {
-      "user": "0x72bFa452727d7203D20f8E68583F1B88E078271a",
       "clicks": "339"
     },
     {
@@ -18001,10 +18001,10 @@
   "stats": {
     "totalUsers": 4499,
     "checkIns": {
-      "checkInsToday": 58,
-      "totalCheckIns": 10524,
+      "checkInsToday": 59,
+      "totalCheckIns": 10525,
       "maxStreak": 1
     }
   },
-  "totalCheckIns": 10524
+  "totalCheckIns": 10525
 }
