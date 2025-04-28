@@ -1,5 +1,5 @@
 {
-  "count": 95,
+  "count": 96,
   "users": {
     "0x9046de77226c18f601bce7e8f1b9c1152ea263e3": true,
     "0x2b3cf70d77052cc4e352d6ebf9ce887b225413f9": true,
@@ -95,6 +95,7 @@
     "0x5bd086e14c0ce76db6eb5711809997c4d7cef379": true,
     "0x36b8b9040796ad81501ba4ce380691dc5efa9b96": true,
     "0xbbd5d3d0a362d19976390e1d7cb284db559e5571": true,
-    "0xe1088aa529e40c79e3063d534ffaf3d1cd52149b": true
+    "0xe1088aa529e40c79e3063d534ffaf3d1cd52149b": true,
+    "0x7fbdd000265793b2effcbc1a79aacb324cb20f57": true
   }
 }
