@@ -1,5 +1,5 @@
 {
-  "lastUpdate": "2025-04-30T11:10:34.671Z",
+  "lastUpdate": "2025-04-30T12:22:44.349Z",
   "data": [
     {
       "user": "0x5D05cFc5B225238b0Ec9c86c14f560cF4334f6Cb",
@@ -179,7 +179,7 @@
     },
     {
       "user": "0x9046DE77226c18F601bCE7e8f1b9C1152eA263e3",
-      "clicks": "4232"
+      "clicks": "4233"
     },
     {
       "user": "0xa443D1F047Ad0F4dcB67105A5b5c9E1313eAc89C",
@@ -187,15 +187,15 @@
     },
     {
       "user": "0x2b3cF70D77052Cc4e352d6ebF9CE887B225413f9",
-      "clicks": "3425"
+      "clicks": "3486"
     },
     {
       "user": "0x163819612F2177b0C09900D8968Fec8F6222d29C",
-      "clicks": "3131"
+      "clicks": "3190"
     },
     {
       "user": "0x3D635c7E8545710535544E816c54f82deB3BDDb3",
-      "clicks": "3078"
+      "clicks": "3132"
     },
     {
       "user": "0x11315Cce8f009e4CB4234FFEAF2E860b84E5b0f6",
@@ -203,7 +203,7 @@
     },
     {
       "user": "0x644e420066Bc23683AB77bA8250079C5BCD4dCa7",
-      "clicks": "2981"
+      "clicks": "3043"
     },
     {
       "user": "0x3d2b1177305fF33E2384F3e059B9dDE10147ABD5",
@@ -351,15 +351,15 @@
     },
     {
       "user": "0x4962CAEDFDfCAEdAcF9Db8be377e0191Edd97266",
-      "clicks": "2014"
+      "clicks": "2041"
     },
     {
       "user": "0x372603621F4A2D86cA17bC7FDf1806F641d78b33",
-      "clicks": "1945"
+      "clicks": "2037"
     },
     {
       "user": "0x4f85d13D523b085091267993D912016974090FC7",
-      "clicks": "1906"
+      "clicks": "1956"
     },
     {
       "user": "0x7DC02fe365b7BF6BAEfB9Db492a27d8509C87F95",
@@ -387,7 +387,7 @@
     },
     {
       "user": "0xb7C9Bfa9116AC2e8578E340fE04F172B59ab9979",
-      "clicks": "1818"
+      "clicks": "1819"
     },
     {
       "user": "0x31b6aAc6220806251c5019077A911fb348590cB4",
@@ -2278,6 +2278,10 @@
       "clicks": "188"
     },
     {
+      "user": "0xDCE3133947b666c344C49299ea4599b39eaC0A71",
+      "clicks": "187"
+    },
+    {
       "user": "0x5a19572fCde0f4fC8d5F7945Be083317aC06DaE8",
       "clicks": "187"
     },
@@ -2408,10 +2412,6 @@
     {
       "user": "0x95aC79e3987378fCe64Cf85dbBBCe17D343E96e4",
       "clicks": "182"
-    },
-    {
-      "user": "0xDCE3133947b666c344C49299ea4599b39eaC0A71",
-      "clicks": "181"
     },
     {
       "user": "0x334758D78f5DD68fcEfc249224d1F9576eF6ee28",
@@ -3878,6 +3878,10 @@
       "clicks": "99"
     },
     {
+      "user": "0x3eB210eAa4026f62D027fafABA1fa5592feBb06A",
+      "clicks": "99"
+    },
+    {
       "user": "0x9A83B1d98b52F235612D7183Ae6748D01087763a",
       "clicks": "98"
     },
@@ -4103,10 +4107,6 @@
     },
     {
       "user": "0x427981C41A4337f0AFa4A625184b454D99a7C577",
-      "clicks": "90"
-    },
-    {
-      "user": "0x3eB210eAa4026f62D027fafABA1fa5592feBb06A",
       "clicks": "90"
     },
     {
@@ -4614,6 +4614,10 @@
       "clicks": "72"
     },
     {
+      "user": "0xBBD5d3d0A362D19976390e1D7cB284DB559E5571",
+      "clicks": "71"
+    },
+    {
       "user": "0x0000544446FDc72A74281B12493C13E3ed79802E",
       "clicks": "71"
     },
@@ -4804,10 +4808,6 @@
     {
       "user": "0xf5d53A9Ee7E2C6a18573EA4ad009be31F941B319",
       "clicks": "66"
-    },
-    {
-      "user": "0xBBD5d3d0A362D19976390e1D7cB284DB559E5571",
-      "clicks": "65"
     },
     {
       "user": "0x0000F30A0c870970952abC0Cba5C4A3F06E82592",
@@ -5447,6 +5447,10 @@
     },
     {
       "user": "0xDBDb01820E214E5d435815f554E1Baf58090f404",
+      "clicks": "46"
+    },
+    {
+      "user": "0xb876444a716388c3910cca7f3CA64aB25D920c9c",
       "clicks": "46"
     },
     {
@@ -7071,10 +7075,6 @@
     },
     {
       "user": "0x0000695374651bce6DB2950C6c636a53D34A4578",
-      "clicks": "22"
-    },
-    {
-      "user": "0xb876444a716388c3910cca7f3CA64aB25D920c9c",
       "clicks": "22"
     },
     {
@@ -18101,10 +18101,10 @@
   "stats": {
     "totalUsers": 4524,
     "checkIns": {
-      "checkInsToday": 45,
-      "totalCheckIns": 10783,
+      "checkInsToday": 50,
+      "totalCheckIns": 10789,
       "maxStreak": 1
     }
   },
-  "totalCheckIns": 10783
+  "totalCheckIns": 10789
 }
