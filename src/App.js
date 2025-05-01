@@ -1458,7 +1458,7 @@ function App() {
             <h2>🏆 Leaderboard</h2>
             {lastLeaderboardUpdate && (
               <div className="last-update">
-                Snapshot is scheduled for 30-04-25 00:00 UTC.
+                Snapshot is scheduled for 30-04-25 23:11:58 UTC.
               </div>            
             )}
             {isConnected && (
