@@ -1,5 +1,5 @@
 {
-  "lastUpdate": "2025-05-02T17:11:01.055Z",
+  "lastUpdate": "2025-05-02T18:16:34.342Z",
   "data": [
     {
       "user": "0x5D05cFc5B225238b0Ec9c86c14f560cF4334f6Cb",
@@ -18134,9 +18134,9 @@
     "totalUsers": 4532,
     "checkIns": {
       "checkInsToday": 65,
-      "totalCheckIns": 10981,
+      "totalCheckIns": 10982,
       "maxStreak": 1
     }
   },
-  "totalCheckIns": 10981
+  "totalCheckIns": 10982
 }
