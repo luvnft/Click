@@ -1,5 +1,5 @@
 {
-  "lastUpdate": "2025-05-02T20:13:51.402Z",
+  "lastUpdate": "2025-05-02T21:11:15.003Z",
   "data": [
     {
       "user": "0x5D05cFc5B225238b0Ec9c86c14f560cF4334f6Cb",
@@ -518,6 +518,10 @@
       "clicks": "1137"
     },
     {
+      "user": "0x7Ac9fd66197F4445F79683Ac02B69739ce9A64a7",
+      "clicks": "1135"
+    },
+    {
       "user": "0x999404E0A630c2A1Bf3F7BfBaE5c1aDDF893f2C4",
       "clicks": "1133"
     },
@@ -536,10 +540,6 @@
     {
       "user": "0x6839aD5cD594fCd01274D00ec3C46c22323594de",
       "clicks": "1066"
-    },
-    {
-      "user": "0x7Ac9fd66197F4445F79683Ac02B69739ce9A64a7",
-      "clicks": "1063"
     },
     {
       "user": "0x9eaeC5538953319a93c22b6e3875bC0041F20A1D",
@@ -1786,6 +1786,10 @@
       "clicks": "239"
     },
     {
+      "user": "0xbA54Fc9D5a62fd08215881e2DfDf15d216CE4807",
+      "clicks": "238"
+    },
+    {
       "user": "0x190117706f64bd363d36474482b1c873B6A6Af2F",
       "clicks": "237"
     },
@@ -1860,10 +1864,6 @@
     {
       "user": "0x6647f372594D5a4C3aF47720326Fe84Fa563D6bA",
       "clicks": "229"
-    },
-    {
-      "user": "0xbA54Fc9D5a62fd08215881e2DfDf15d216CE4807",
-      "clicks": "228"
     },
     {
       "user": "0x0e2e8D87DA0f7FA5BFa8F3aAE9b649D9a68e9109",
@@ -18133,10 +18133,10 @@
   "stats": {
     "totalUsers": 4532,
     "checkIns": {
-      "checkInsToday": 67,
-      "totalCheckIns": 10984,
+      "checkInsToday": 69,
+      "totalCheckIns": 10986,
       "maxStreak": 1
     }
   },
-  "totalCheckIns": 10984
+  "totalCheckIns": 10986
 }
