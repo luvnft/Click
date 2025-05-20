@@ -1,9 +1,9 @@
 {
-  "currentStreak": 1,
+  "currentStreak": 2,
   "maxStreak": 2,
   "lastCheckIn": "2025-05-20",
-  "totalCheckIns": 5,
+  "totalCheckIns": 6,
   "months": {
-    "2025-05": 5
+    "2025-05": 6
   }
 }
