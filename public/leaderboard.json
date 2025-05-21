@@ -1,5 +1,5 @@
 {
-  "lastUpdate": "2025-05-21T09:13:46.448Z",
+  "lastUpdate": "2025-05-21T10:13:42.164Z",
   "data": [
     {
       "user": "0x5D05cFc5B225238b0Ec9c86c14f560cF4334f6Cb",
@@ -255,7 +255,7 @@
     },
     {
       "user": "0x4962CAEDFDfCAEdAcF9Db8be377e0191Edd97266",
-      "clicks": "2518"
+      "clicks": "2522"
     },
     {
       "user": "0xDB235928E82F8870499047634720CbD3be357D39",
@@ -3646,6 +3646,10 @@
       "clicks": "113"
     },
     {
+      "user": "0x706E75f1D01cdbe99B44FBc9B3aB35bF39780dFA",
+      "clicks": "113"
+    },
+    {
       "user": "0xb37466C31B8b4b707BD7C95e8F5aAA414AA587a9",
       "clicks": "112"
     },
@@ -3723,10 +3727,6 @@
     },
     {
       "user": "0x0000AA5E631EA5930206Ca0b920E28d8Ec15C3ba",
-      "clicks": "110"
-    },
-    {
-      "user": "0x706E75f1D01cdbe99B44FBc9B3aB35bF39780dFA",
       "clicks": "110"
     },
     {
@@ -5222,6 +5222,14 @@
       "clicks": "55"
     },
     {
+      "user": "0xF38fFaE62d44bB3742ffA77bc2988df44dA449Bb",
+      "clicks": "55"
+    },
+    {
+      "user": "0x8c5Ef87F3150599685ca43F0f5F03b5EDC9285b3",
+      "clicks": "54"
+    },
+    {
       "user": "0x000087EE43E11b3C2E076b4DCD3ac45bad9A737D",
       "clicks": "54"
     },
@@ -5280,10 +5288,6 @@
     {
       "user": "0x00002bAE8AAD76740AA7826D99A84724CFc4ADCD",
       "clicks": "53"
-    },
-    {
-      "user": "0x8c5Ef87F3150599685ca43F0f5F03b5EDC9285b3",
-      "clicks": "52"
     },
     {
       "user": "0xe81bc096f3A43C31A6C3255Fa6D5Ae11c3eA6C4E",
@@ -7583,10 +7587,6 @@
     },
     {
       "user": "0x49648311Eb4136b8A1574B883BCD38F9EEd0261f",
-      "clicks": "20"
-    },
-    {
-      "user": "0xF38fFaE62d44bB3742ffA77bc2988df44dA449Bb",
       "clicks": "20"
     },
     {
@@ -18257,10 +18257,10 @@
   "stats": {
     "totalUsers": 4563,
     "checkIns": {
-      "checkInsToday": 21,
-      "totalCheckIns": 12014,
+      "checkInsToday": 25,
+      "totalCheckIns": 12019,
       "maxStreak": 1
     }
   },
-  "totalCheckIns": 12014
+  "totalCheckIns": 12019
 }
