@@ -1,51 +1,16 @@
 {
   "stats": {
-    "totalCheckIns": 12176,
+    "totalCheckIns": 12178,
     "maxStreak": 1,
-    "checkInsToday": 37,
-    "lastUpdate": "2025-05-24T23:11:23.943Z"
+    "checkInsToday": 2,
+    "lastUpdate": "2025-05-25T01:05:20.062Z"
   },
   "dailyData": {
-    "2025-05-24": {
-      "count": 37,
+    "2025-05-25": {
+      "count": 2,
       "users": [
-        "0x305faa773ae38ec3ff5bfbbb1169b5de40f57227",
-        "0x4962caedfdfcaedacf9db8be377e0191edd97266",
-        "0xfd308dfdb978b8ed3675a90394040c5b44989e8c",
-        "0xe3de158d90d0091b673a6183a947a873d893f76c",
         "0xdce3133947b666c344c49299ea4599b39eac0a71",
-        "0x0ce4b16411b408bc9f06d456175db3cc79b25299",
-        "0x321514bdc2a84ea04047ecfe5e17d5467d3a0a6c",
-        "0xf99f522eff86a6066aabe9459d8a03bfe36e18b1",
-        "0x4a8827f0db7c4a9cf4cc043196f120d560c2a9a6",
-        "0x6309a610c05fc310866f5313f3bceb1457ef564c",
-        "0x7ac9fd66197f4445f79683ac02b69739ce9a64a7",
-        "0xbeebb1337e26b2eaaea81703bb82fea183a279a9",
-        "0xf66d4094d0c66fc43494b453008f6853b4a45c89",
-        "0x9046de77226c18f601bce7e8f1b9c1152ea263e3",
-        "0xe5324d244ba8df0e894b45f6e2485e4e0f115f38",
-        "0xd67c07e38cc652b41716e0f23bf0a61eb665ad84",
-        "0xda5103b3ef093320a817de73fd8da8efe7477510",
-        "0x0f9ec279d6c990493805391ed2a7ac6fb89eee26",
-        "0x59139d70ff6908b25c90f07b924ca80c51c43b2d",
-        "0x9830d6b37fe7488707cc4ad7f8b481d75eb2a8c2",
-        "0xd714b4b509b9293e7aa25b8caecab9ccc98cf2cd",
-        "0x5ab9125a5a07797432b022e6f9b573f23c34a012",
-        "0x99437ad0c95435e860dfb2e6995626b3d8809a2e",
-        "0xd118948a587ed73945506812ab57b498b696290b",
-        "0x306b5629d35bc5d2fbd3ab8c975b911dc1783a21",
-        "0x97b6653606dbe7075f72ae5c0a13e6691e8b8dfe",
-        "0x3d096a48dd10802b4ef89c5b7e9d590e6223799e",
-        "0x3a2894642cd0ee6bafcb3920a447d5dad2f1c6d3",
-        "0xc298c36eb5840a4b0e5bfb4145742b198cc9ced9",
-        "0xb2639b276120f1b47829faa327d08b654e4b8328",
-        "0x2efb5f477d1e711c58809ac48228c9d56dfaec8a",
-        "0x3eb210eaa4026f62d027fafaba1fa5592febb06a",
-        "0xea0cdefd88c645a934ef58283130020066373917",
-        "0x61741b9eb6a159b47a535b11e3e8d370c07e50ea",
-        "0xbbd5d3d0a362d19976390e1d7cb284db559e5571",
-        "0x506685ad6e1d208d37547fd8d10a9124444251ac",
-        "0xe61e74eddac813d5738ff19ecabbd6661958abc6"
+        "0xfd308dfdb978b8ed3675a90394040c5b44989e8c"
       ]
     }
   },
