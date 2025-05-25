@@ -1,5 +1,5 @@
 {
-  "lastUpdate": "2025-05-25T14:10:37.984Z",
+  "lastUpdate": "2025-05-25T15:11:06.444Z",
   "data": [
     {
       "user": "0x5D05cFc5B225238b0Ec9c86c14f560cF4334f6Cb",
@@ -1686,6 +1686,10 @@
       "clicks": "253"
     },
     {
+      "user": "0x0272D322a1071EC9A95D3474c2473Cff0C28C416",
+      "clicks": "252"
+    },
+    {
       "user": "0x3D293f8fEEd6cA2344319881fDDD1CB75093385C",
       "clicks": "252"
     },
@@ -1719,10 +1723,6 @@
     },
     {
       "user": "0xBDc66788f84840d7495dd722B3eb1711e65Dd83A",
-      "clicks": "248"
-    },
-    {
-      "user": "0x0272D322a1071EC9A95D3474c2473Cff0C28C416",
       "clicks": "248"
     },
     {
@@ -2278,6 +2278,10 @@
       "clicks": "191"
     },
     {
+      "user": "0x97b6653606DbE7075f72AE5c0A13e6691e8b8Dfe",
+      "clicks": "190"
+    },
+    {
       "user": "0xCDCbFFa97EDaF82Abd6C02D2aB12D59D7A700a01",
       "clicks": "190"
     },
@@ -2336,10 +2340,6 @@
     {
       "user": "0x7Ed9f7DBe6F54CBf09Ad6caD27ef7e3D509BEA1A",
       "clicks": "187"
-    },
-    {
-      "user": "0x97b6653606DbE7075f72AE5c0A13e6691e8b8Dfe",
-      "clicks": "186"
     },
     {
       "user": "0xa2Ce79cb2eb70D56aF5F50530ba46b8D27B5B8B8",
@@ -3482,6 +3482,10 @@
       "clicks": "120"
     },
     {
+      "user": "0x3A2894642CD0eE6bAFCB3920a447D5DAD2f1c6D3",
+      "clicks": "120"
+    },
+    {
       "user": "0x00009B4739dAa2eF337490a8FEa9796cfEAa4DA9",
       "clicks": "120"
     },
@@ -3531,10 +3535,6 @@
     },
     {
       "user": "0x0c1F978D8E3b95C1B1C01EA488Be87ed494bF89B",
-      "clicks": "118"
-    },
-    {
-      "user": "0x3A2894642CD0eE6bAFCB3920a447D5DAD2f1c6D3",
       "clicks": "118"
     },
     {
@@ -3806,6 +3806,10 @@
       "clicks": "105"
     },
     {
+      "user": "0x2Efb5F477D1e711C58809Ac48228c9d56dFAeC8A",
+      "clicks": "105"
+    },
+    {
       "user": "0x000012eF2695a15EA238f5b5BC039a1BE03c7942",
       "clicks": "105"
     },
@@ -3891,10 +3895,6 @@
     },
     {
       "user": "0x68b62563D9C35E913D5dc9B24185CAA390314215",
-      "clicks": "100"
-    },
-    {
-      "user": "0x2Efb5F477D1e711C58809Ac48228c9d56dFAeC8A",
       "clicks": "100"
     },
     {
@@ -18261,10 +18261,10 @@
   "stats": {
     "totalUsers": 4564,
     "checkIns": {
-      "checkInsToday": 18,
-      "totalCheckIns": 12195,
+      "checkInsToday": 22,
+      "totalCheckIns": 12199,
       "maxStreak": 1
     }
   },
-  "totalCheckIns": 12195
+  "totalCheckIns": 12199
 }
