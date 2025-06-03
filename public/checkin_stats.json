@@ -1,47 +1,17 @@
 {
   "stats": {
-    "totalCheckIns": 12542,
+    "totalCheckIns": 12545,
     "maxStreak": 1,
-    "checkInsToday": 33,
-    "lastUpdate": "2025-06-02T23:11:51.685Z"
+    "checkInsToday": 3,
+    "lastUpdate": "2025-06-03T01:01:24.069Z"
   },
   "dailyData": {
-    "2025-06-02": {
-      "count": 33,
+    "2025-06-03": {
+      "count": 3,
       "users": [
         "0x4a8827f0db7c4a9cf4cc043196f120d560c2a9a6",
         "0x305faa773ae38ec3ff5bfbbb1169b5de40f57227",
-        "0x9046de77226c18f601bce7e8f1b9c1152ea263e3",
-        "0xdce3133947b666c344c49299ea4599b39eac0a71",
-        "0xfd308dfdb978b8ed3675a90394040c5b44989e8c",
-        "0x5db3630c63d862bdecbf9fa1ed8021d7f55287da",
-        "0x40bbb2ea5c38a164fc666e95f21f9272485c8021",
-        "0x0ce4b16411b408bc9f06d456175db3cc79b25299",
-        "0x7d0b61474564fdedee5b711b5bc370d636ab6794",
-        "0x2a68272f9ed46c0141494b4c7949c3fb40801683",
-        "0x97a30c15f192dd4a59bd40ff930159b8b58db2c2",
-        "0xffadffcc2d81fae57120b7a5d6eb97f430a14314",
-        "0x6309a610c05fc310866f5313f3bceb1457ef564c",
-        "0x8d37ffa50ac1efcc0c1c0c52e6741433f3793565",
-        "0xbeebb1337e26b2eaaea81703bb82fea183a279a9",
-        "0xf66d4094d0c66fc43494b453008f6853b4a45c89",
-        "0xd67c07e38cc652b41716e0f23bf0a61eb665ad84",
-        "0x9830d6b37fe7488707cc4ad7f8b481d75eb2a8c2",
-        "0x306b5629d35bc5d2fbd3ab8c975b911dc1783a21",
-        "0xc65af0594229acb4877a28ea8b987d80e79d65a4",
-        "0x1941d8f1d75d408f41fd37ed30e2ead142a6702f",
-        "0xe5324d244ba8df0e894b45f6e2485e4e0f115f38",
-        "0x177040991b555c45191961fb687c4cfae8c5cd43",
-        "0x0f9ec279d6c990493805391ed2a7ac6fb89eee26",
-        "0x0272d322a1071ec9a95d3474c2473cff0c28c416",
-        "0x3eb210eaa4026f62d027fafaba1fa5592febb06a",
-        "0x3a2894642cd0ee6bafcb3920a447d5dad2f1c6d3",
-        "0xc298c36eb5840a4b0e5bfb4145742b198cc9ced9",
-        "0xb2639b276120f1b47829faa327d08b654e4b8328",
-        "0x2efb5f477d1e711c58809ac48228c9d56dfaec8a",
-        "0xbbd5d3d0a362d19976390e1d7cb284db559e5571",
-        "0x7ac9fd66197f4445f79683ac02b69739ce9a64a7",
-        "0xe61e74eddac813d5738ff19ecabbd6661958abc6"
+        "0xfd308dfdb978b8ed3675a90394040c5b44989e8c"
       ]
     }
   },
