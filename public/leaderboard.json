@@ -1,5 +1,5 @@
 {
-  "lastUpdate": "2025-06-08T09:11:30.704Z",
+  "lastUpdate": "2025-06-08T10:12:12.876Z",
   "data": [
     {
       "user": "0x5D05cFc5B225238b0Ec9c86c14f560cF4334f6Cb",
@@ -5194,6 +5194,10 @@
       "clicks": "58"
     },
     {
+      "user": "0x7c56D4dBa0425568aE978992af97Fae1E7447E70",
+      "clicks": "58"
+    },
+    {
       "user": "0x0000a9b4fA90691734c0Fc79Ab0eeeb3BF742A19",
       "clicks": "58"
     },
@@ -5220,10 +5224,6 @@
     {
       "user": "0x000042A70edb89fB43fd863fe845F1830981dca1",
       "clicks": "57"
-    },
-    {
-      "user": "0x7c56D4dBa0425568aE978992af97Fae1E7447E70",
-      "clicks": "56"
     },
     {
       "user": "0x36B8b9040796ad81501bA4CE380691Dc5EfA9B96",
@@ -6242,6 +6242,10 @@
       "clicks": "33"
     },
     {
+      "user": "0x946A91037fA639CE0383d6112827e913A5261f89",
+      "clicks": "33"
+    },
+    {
       "user": "0x0000A177a9a26b1a7B0Bc4316492F73D78958c11",
       "clicks": "33"
     },
@@ -6386,7 +6390,7 @@
       "clicks": "30"
     },
     {
-      "user": "0x946A91037fA639CE0383d6112827e913A5261f89",
+      "user": "0xBD3CaA9f11e730e552381853e8461690F4ed831F",
       "clicks": "30"
     },
     {
@@ -6519,10 +6523,6 @@
     },
     {
       "user": "0xb7eB3Ae62E230E89712E39D1FeCB01F5b484E83C",
-      "clicks": "27"
-    },
-    {
-      "user": "0xBD3CaA9f11e730e552381853e8461690F4ed831F",
       "clicks": "27"
     },
     {
@@ -6739,6 +6739,10 @@
     },
     {
       "user": "0xDaed581f258c0378FFeC66dFa91e63C033D4ba2D",
+      "clicks": "25"
+    },
+    {
+      "user": "0x1f965fCbc98818B905C10B48884DBc697a649Fac",
       "clicks": "25"
     },
     {
@@ -7011,10 +7015,6 @@
     },
     {
       "user": "0x9695e1A95EEe2D3b70005b7b5D0CB1310C37a739",
-      "clicks": "23"
-    },
-    {
-      "user": "0x1f965fCbc98818B905C10B48884DBc697a649Fac",
       "clicks": "23"
     },
     {
@@ -7522,6 +7522,10 @@
       "clicks": "21"
     },
     {
+      "user": "0x6e4fBdD9354A2060736F2d0b68A864dAdf6C3475",
+      "clicks": "21"
+    },
+    {
       "user": "0x0000a1871559C135F97B1C9444A4770920ddCecf",
       "clicks": "21"
     },
@@ -7631,10 +7635,6 @@
     },
     {
       "user": "0x0000c758869920bBeF21e66588fa204A241660A6",
-      "clicks": "20"
-    },
-    {
-      "user": "0x6e4fBdD9354A2060736F2d0b68A864dAdf6C3475",
       "clicks": "20"
     },
     {
