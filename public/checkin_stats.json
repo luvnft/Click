@@ -1,44 +1,18 @@
 {
   "stats": {
-    "totalCheckIns": 12732,
+    "totalCheckIns": 12736,
     "maxStreak": 1,
-    "checkInsToday": 30,
-    "lastUpdate": "2025-06-08T23:11:26.841Z"
+    "checkInsToday": 4,
+    "lastUpdate": "2025-06-09T01:04:19.732Z"
   },
   "dailyData": {
-    "2025-06-08": {
-      "count": 30,
+    "2025-06-09": {
+      "count": 4,
       "users": [
-        "0x5db3630c63d862bdecbf9fa1ed8021d7f55287da",
         "0x4a8827f0db7c4a9cf4cc043196f120d560c2a9a6",
-        "0x6309a610c05fc310866f5313f3bceb1457ef564c",
         "0x305faa773ae38ec3ff5bfbbb1169b5de40f57227",
-        "0x9046de77226c18f601bce7e8f1b9c1152ea263e3",
-        "0xdce3133947b666c344c49299ea4599b39eac0a71",
-        "0xfd308dfdb978b8ed3675a90394040c5b44989e8c",
-        "0xbeebb1337e26b2eaaea81703bb82fea183a279a9",
-        "0x0ce4b16411b408bc9f06d456175db3cc79b25299",
-        "0xe5324d244ba8df0e894b45f6e2485e4e0f115f38",
-        "0xd627675cfa739a63e818f1c70f99431d3088f6c6",
-        "0x9830d6b37fe7488707cc4ad7f8b481d75eb2a8c2",
-        "0x7c56d4dba0425568ae978992af97fae1e7447e70",
-        "0x946a91037fa639ce0383d6112827e913a5261f89",
-        "0xbd3caa9f11e730e552381853e8461690f4ed831f",
-        "0x1f965fcbc98818b905c10b48884dbc697a649fac",
-        "0x6e4fbdd9354a2060736f2d0b68a864dadf6c3475",
-        "0xf66d4094d0c66fc43494b453008f6853b4a45c89",
-        "0xd67c07e38cc652b41716e0f23bf0a61eb665ad84",
-        "0x61741b9eb6a159b47a535b11e3e8d370c07e50ea",
-        "0x999404e0a630c2a1bf3f7bfbae5c1addf893f2c4",
-        "0x0f9ec279d6c990493805391ed2a7ac6fb89eee26",
-        "0xbbd5d3d0a362d19976390e1d7cb284db559e5571",
-        "0xc298c36eb5840a4b0e5bfb4145742b198cc9ced9",
-        "0xb2639b276120f1b47829faa327d08b654e4b8328",
-        "0x2efb5f477d1e711c58809ac48228c9d56dfaec8a",
-        "0x3eb210eaa4026f62d027fafaba1fa5592febb06a",
-        "0x3a2894642cd0ee6bafcb3920a447d5dad2f1c6d3",
-        "0xe61e74eddac813d5738ff19ecabbd6661958abc6",
-        "0xc65b67e6f685d43f4f8908ab5edd031881bb395b"
+        "0x506685ad6e1d208d37547fd8d10a9124444251ac",
+        "0xfd308dfdb978b8ed3675a90394040c5b44989e8c"
       ]
     }
   },
