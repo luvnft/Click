@@ -1,13 +1,13 @@
 {
   "stats": {
-    "totalCheckIns": 12931,
+    "totalCheckIns": 12944,
     "maxStreak": 1,
-    "checkInsToday": 18,
-    "lastUpdate": "2025-06-13T09:13:54.550Z"
+    "checkInsToday": 30,
+    "lastUpdate": "2025-06-13T10:13:50.985Z"
   },
   "dailyData": {
     "2025-06-13": {
-      "count": 18,
+      "count": 30,
       "users": [
         "0x4a8827f0db7c4a9cf4cc043196f120d560c2a9a6",
         "0x6309a610c05fc310866f5313f3bceb1457ef564c",
@@ -26,7 +26,19 @@
         "0x0f9ec279d6c990493805391ed2a7ac6fb89eee26",
         "0x3a2894642cd0ee6bafcb3920a447d5dad2f1c6d3",
         "0x9830d6b37fe7488707cc4ad7f8b481d75eb2a8c2",
-        "0xb7a8969219f2f8108fb8dac4b30cc944c1cd833b"
+        "0xb7a8969219f2f8108fb8dac4b30cc944c1cd833b",
+        "0xc298c36eb5840a4b0e5bfb4145742b198cc9ced9",
+        "0xb2639b276120f1b47829faa327d08b654e4b8328",
+        "0x2efb5f477d1e711c58809ac48228c9d56dfaec8a",
+        "0x4e79f7c7deed79c53e73c6333bce526d33c07c8e",
+        "0x40bbb2ea5c38a164fc666e95f21f9272485c8021",
+        "0x8305b3ac78c60a84d150a9ee6b7d72b0c08a2475",
+        "0xce089c06f40737683143ea7eaed4f773f1492c44",
+        "0x6fcf7167d2cfc5ae5417da87408e0ebbdea406ed",
+        "0x6413a4f28fb8a58fd76c28fb4ae958722cc578b8",
+        "0xc6f4eefab5d79a292e22a43d83886f6432a52b10",
+        "0xa64fcc82431c7388e8a15a7b5c0bdbf492bde699",
+        "0xefc8b6e5bdda8fc9b46ae96bf8cf3a280da96f94"
       ]
     }
   },
