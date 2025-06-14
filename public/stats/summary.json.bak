@@ -1,8 +1,8 @@
 {
-  "lastUpdate": "2025-06-14T09:13:07.010Z",
+  "lastUpdate": "2025-06-14T10:12:25.696Z",
   "totalUsers": 4572,
-  "checkInsToday": 17,
-  "totalCheckIns": 12984,
+  "checkInsToday": 18,
+  "totalCheckIns": 12985,
   "maxStreak": 1,
   "lastSevenDays": {
     "2025-04-12": 532,
@@ -74,6 +74,6 @@
     "2025-06-11": 41,
     "2025-06-12": 50,
     "2025-06-13": 43,
-    "2025-06-14": 17
+    "2025-06-14": 18
   }
 }
