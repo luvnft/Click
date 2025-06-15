@@ -7,7 +7,7 @@ import abi from "./ClickCounterABI.json";
 import bgMusicFile from "./assets/sounds/dont-talk.mp3";
 import clickSoundFile from "./assets/effects/click.mp3";
 import { Analytics } from "@vercel/analytics/react";
-import { FaGithub, FaXTwitter } from "react-icons/fa6";
+import { FaGithub} from "react-icons/fa6";
 import { FaXTwitter } from "react-icons/fa6";
 
 const CONTRACT_ADDRESS = "0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45";
