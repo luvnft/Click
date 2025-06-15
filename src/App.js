@@ -1536,30 +1536,16 @@ function App() {
         disabled={currentPage >= totalPages}
       >
         ▶
-      </button>
-    </div>
-
-    {renderCheckInModal()}
-    <WalletSelectorModal />
-    <ToastContainer position="bottom-left" theme="dark" />
-    <Analytics />
-
-const App = () => {
-  return (
-    <div className="app-container">
-      {/* Social Links */}
-      <div className="social-links">
-        <a
-          href="https://x.com/atl5d"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="X (Twitter)"
-        >
-          <FaXTwitter />
-        </a>
+        </button>
       </div>
+
+      {renderCheckInModal()}
+      <WalletSelectorModal />
+      <ToastContainer position="bottom-left" theme="dark" />
+      <Analytics />
     </div>
   );
 };
 
 export default App;
+
