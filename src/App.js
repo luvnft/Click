@@ -8,6 +8,7 @@ import bgMusicFile from "./assets/sounds/dont-talk.mp3";
 import clickSoundFile from "./assets/effects/click.mp3";
 import { Analytics } from "@vercel/analytics/react";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
+import { FaXTwitter } from "react-icons/fa6";
 
 const CONTRACT_ADDRESS = "0x0b9eD03FaA424eB56ea279462BCaAa5bA0d2eC45";
 const TEA_CHAIN_ID_HEX = "0x27EA"; // Tea Sepolia (10218)
@@ -1521,40 +1522,36 @@ function App() {
             </div>
           </div>
           
-          <div className="pagination">
-            <button 
-              className="pagination-btn" 
-              onClick={prevPage}
-              disabled={currentPage <= 1}
-            >
-              ◀
-            </button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button 
-              className="pagination-btn" 
-              onClick={nextPage}
-              disabled={currentPage >= totalPages}
-            >
-              ▶
-            </button>
-          </div>
-        </div>
-      </div>
-
-            {renderCheckInModal()}
-      <WalletSelectorModal />
-      <ToastContainer position="bottom-left" theme="dark" />
-      <Analytics />
-
-      {/* Social Links */} 
-      <div className="social-links">
-        <a href="https://x.com/atl5d" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-          <FaXTwitter />
-        </a>
-      </div>
-
+              <div className="pagination">
+      <button 
+        className="pagination-btn" 
+        onClick={prevPage}
+        disabled={currentPage <= 1}
+      >
+        ◀
+      </button>
+      <span>Page {currentPage} of {totalPages}</span>
+      <button 
+        className="pagination-btn" 
+        onClick={nextPage}
+        disabled={currentPage >= totalPages}
+      >
+        ▶
+      </button>
     </div>
-  );
-}
+
+    {renderCheckInModal()}
+    <WalletSelectorModal />
+    <ToastContainer position="bottom-left" theme="dark" />
+    <Analytics />
+
+    {/* Social Links */} 
+    <div className="social-links">
+      <a href="https://x.com/atl5d" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+        <FaXTwitter />
+      </a>
+    </div>
+  </div>  // ← Closing tag for the root `div`
+);
 
 export default App;
