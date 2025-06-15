@@ -1478,6 +1478,15 @@ function App() {
               </div>
             )}
           </div>
+            <div className="leaderboard-footer-text">
+          <p>
+             👀 Tap dat ass-et up the leaderboard. #1 gets their song featured all month!
+          </p>
+          <p>
+             💡 Keep clicking to climb higher and earn more $ATL tokens!
+          </p>
+          </div>
+          </div>
 
           <div className="leaderboard-content">
             <div className="leaderboard-header-columns">
@@ -1532,17 +1541,14 @@ function App() {
         </div>
       </div>
 
-      {renderCheckInModal()}
+            {renderCheckInModal()}
       <WalletSelectorModal />
       <ToastContainer position="bottom-left" theme="dark" />
       <Analytics />
 
       {/* Social Links */} 
       <div className="social-links">
-        <a href="https://github.com/jobjab-dev/Clickonchain.xyz" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-          <FaGithub />
-        </a> 
-        <a href="https://x.com/jobjab_eth" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+        <a href="https://x.com/atl5d" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
           <FaXTwitter />
         </a>
       </div>
