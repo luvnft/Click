@@ -1544,13 +1544,22 @@ function App() {
     <ToastContainer position="bottom-left" theme="dark" />
     <Analytics />
 
-    {/* Social Links */} 
-    <div className="social-links">
-      <a href="https://x.com/atl5d" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-        <FaXTwitter />
-      </a>
+const App = () => {
+  return (
+    <div className="app-container">
+      {/* Social Links */}
+      <div className="social-links">
+        <a
+          href="https://x.com/atl5d"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="X (Twitter)"
+        >
+          <FaXTwitter />
+        </a>
+      </div>
     </div>
-  </div>  // ← Closing tag for the root `div`
-);
+  );
+};
 
 export default App;
